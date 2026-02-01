@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Dust Studio v4.0 - Professional Creative Suite</title>
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- APP DASHBOARD -->
+    <div id="dashboard">
+        <nav class="top-nav">
+            <div class="logo-box">
+                <h1>Cosmic Studio</h1>
+                <span>Professional v4.0</span>
+            </div>
+            <div class="nav-actions">
+                <button class="btn-action" onclick="StudioManager.exportProject()">Export Suite</button>
+                <button class="btn-action" onclick="document.getElementById('import-file').click()">Import
+                    Suite</button>
+                <input type="file" id="import-file" style="display:none" onchange="StudioManager.importProject(this)">
+                <button class="btn-main" style="width:auto; margin:0;" onclick="StudioManager.createNewArt()">Create New
+                    Masterpiece</button>
+            </div>
+        </nav>
+
+        <div class="content-scroll">
+            <div class="art-grid" id="art-grid">
+                <!-- Art Cards injected by main.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- DESIGNER STUDIO -->
+    <div id="designer">
+        <div class="viewer-container" id="viewport">
+            <div id="zoom-wrapper" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+                <div id="studio-canvas-container" class="preview-aspect-story"></div>
+            </div>
+            <div class="designer-overlay"></div>
+            <div id="brush-guide"></div>
+
+            <div class="status-badge">
+                <div class="recording-dot" id="rec-dot"></div>
+                <span id="status-text">Studio Mode: Active</span>
+                <span style="color:var(--text-dim)">|</span>
+                <span style="color:var(--text-secondary)">Hold ALT to Paint • Hold Z to Zoom</span>
+            </div>
+        </div>
+
+        <aside class="ui-panel">
+            <header class="panel-header">
+                <div style="display:flex; flex-direction:column">
+                    <span
+                        style="font-weight:700; letter-spacing:1px; text-transform:uppercase; font-size:0.9rem;">Designer
+                        Suite</span>
+                    <span id="active-art-name" style="font-size:0.7rem; color:var(--text-secondary)">Untitled
+                        Project</span>
+                </div>
+                <button class="btn-action" style="width:auto; padding:5px 10px;"
+                    onclick="StudioManager.closeDesigner()">✕</button>
+            </header>
+
+            <div class="panel-content">
+
+                <!-- Production settings -->
+                <div class="section">
+                    <div class="section-title">Canvas & Aspect Ratio</div>
+                    <div class="control-block">
+                        <label class="control-label">Preview Aspect</label>
+                        <select id="ui-aspect" onchange="StudioManager.updateAspect()">
+                            <option value="story">9:16 Story (Portrait)</option>
+                            <option value="cinema">16:9 Cinema (Landscape)</option>
+                            <option value="square">1:1 Square</option>
+                            <option value="full">Auto / Fullscreen</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Engine Settings -->
+                <div class="section">
+                    <div class="section-title">Visual Engine</div>
+                    <div class="control-block">
+                        <label class="control-label">Shader Style</label>
+                        <select id="ui-style" onchange="StudioManager.updateActiveParams()">
+                            <option value="topographic_lines">Topographic / Isolines</option>
+                            <option value="metaballs_goo">Metaballs / Slime</option>
+                            <option value="ancient_sand">Ancient Sand (Original)</option>
+                            <option value="cosmic_dust">Cosmic Dust v2</option>
+                            <option value="aqueous_caustics">Aqueous Caustics (Water)</option>
+                            <option value="retro_dither">Retro Dither (Ordered)</option>
+                            <option value="pixel_sorter">Pixel Sorter / Melt</option>
+                            <option value="chromatic_glitch">Chromatic Glitch</option>
+                            <option value="neon_flow">Hyper Neon Fluid</option>
+                            <option value="voronoi_cells">Organic Cell Structure</option>
+                            <option value="cyber_grid">Glitch Cyber Grid</option>
+                            <option value="plasma_leak">Plasma Leak / Nebula</option>
+                            <option value="aurora_borealis">Aurora Borealis</option>
+                            <option value="fractal_mandelbulb">Fractal Mandelbulb (2D)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Dynamics Settings -->
+                <div class="section">
+                    <div class="section-title">Dynamics</div>
+                    <div class="control-block">
+                        <label class="control-label"><span id="studio-label-speed">Flow Velocity</span> <span
+                                id="val-speed">0</span></label>
+                        <input type="range" id="ui-speed" min="0" max="0.01" step="0.0001"
+                            oninput="StudioManager.updateActiveParams()">
+                    </div>
+                    <div class="control-block">
+                        <label class="control-label"><span id="studio-label-scale">Noise Scale / Frequency</span> <span
+                                id="val-scale">0</span></label>
+                        <input type="range" id="ui-scale" min="0.5" max="30" step="0.1"
+                            oninput="StudioManager.updateActiveParams()">
+                    </div>
+                    <div class="control-block">
+                        <label class="control-label"><span id="studio-label-complexity">Curls / Complexity</span> <span
+                                id="val-complexity">0</span></label>
+                        <input type="range" id="ui-complexity" min="1" max="10" step="0.1"
+                            oninput="StudioManager.updateActiveParams()">
+                    </div>
+                    <div class="control-block">
+                        <label class="control-label"><span id="studio-label-detail">Thickness / Detail</span> <span
+                                id="val-detail">0</span></label>
+                        <input type="range" id="ui-detail" min="0" max="1" step="0.01"
+                            oninput="StudioManager.updateActiveParams()">
+                    </div>
+                </div>
+
+                <!-- Color Palette -->
+                <div class="section">
+                    <div class="section-title">Chromatics</div>
+                    <div class="color-grid">
+                        <div class="color-item">
+                            <label style="font-size:0.6rem">Primary</label>
+                            <input type="color" id="ui-c1" oninput="StudioManager.updateActiveParams()">
+                        </div>
+                        <div class="color-item">
+                            <label style="font-size:0.6rem">Highlight</label>
+                            <input type="color" id="ui-c2" oninput="StudioManager.updateActiveParams()">
+                        </div>
+                        <div class="color-item">
+                            <label style="font-size:0.6rem">Canvas</label>
+                            <input type="color" id="ui-c3" oninput="StudioManager.updateActiveParams()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Brush Control -->
+                <div class="section">
+                    <div class="section-title">Brush Mechanics</div>
+                    <div class="control-block">
+                        <label class="control-label">Brush Radius <span id="val-brush-r">0</span></label>
+                        <input type="range" id="ui-brush-r" min="0.01" max="0.4" step="0.01"
+                            oninput="StudioManager.updateActiveParams()">
+                    </div>
+                    <div class="control-block">
+                        <label class="control-label">Brush Pressure <span id="val-brush-i">0</span></label>
+                        <input type="range" id="ui-brush-i" min="0" max="2" step="0.1"
+                            oninput="StudioManager.updateActiveParams()">
+                    </div>
+                </div>
+
+                <!-- Export settings -->
+                <div class="section">
+                    <div class="section-title">Production</div>
+                    <div class="control-block">
+                        <label class="control-label">Export Format</label>
+                        <select id="ui-format">
+                            <option value='{"w":2160,"h":3840,"b":50,"f":60}'>4K Portrait 60FPS (Story)</option>
+                            <option value='{"w":3840,"h":2160,"b":50,"f":60}'>4K Cinema 60FPS</option>
+                            <option value='{"w":1080,"h":1920,"b":15,"f":60}'>FHD Portrait 60FPS</option>
+                            <option value='{"w":1080,"h":1080,"b":15,"f":60}'>Square Post 60FPS</option>
+                            <option value='{"w":4320,"h":7680,"b":80,"f":60}'>8K Master Portrait (EXPERIMENTAL)</option>
+                        </select>
+                    </div>
+                    <button class="btn-main" id="btn-record" onclick="StudioManager.toggleRecording()">Start Master
+                        Render</button>
+                    <button class="btn-action" style="margin-top:10px"
+                        onclick="StudioManager.duplicateCurrent()">Duplicate This Art</button>
+                </div>
+
+            </div>
+        </aside>
+    </div>
+
+    <!-- UI TOAST -->
+    <div id="toast">Project Saved to Vault</div>
+
+    <!-- DEPENDENCIES -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="shaders.js"></script>
+    <script src="main.js"></script>
+
+</body>
+
+</html>

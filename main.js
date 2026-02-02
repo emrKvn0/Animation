@@ -202,6 +202,13 @@ class VisualEngine {
         this.brushTexture.needsUpdate = true;
     }
 
+    resetBrush() {
+        if (!this.brushCtx) return;
+        this.brushCtx.fillStyle = 'black';
+        this.brushCtx.fillRect(0, 0, this.brushCanvas.width, this.brushCanvas.height);
+        this.brushTexture.needsUpdate = true;
+    }
+
     update() {
         // Fade effect for brush
         if (this.brushCtx && Math.random() > 0.5) {
@@ -264,7 +271,9 @@ const StudioManager = (() => {
         createDefaultArt('The First Spark', 'ancient_sand'),
         createDefaultArt('Neon Dreams', 'neon_flow'),
         createDefaultArt('Liquid Metal', 'metaballs_goo'),
-        createDefaultArt('Elevation Map', 'topographic_lines')
+        createDefaultArt('Elevation Map', 'topographic_lines'),
+        createDefaultArt('Stellar Drift', 'stellar_ribbons'),
+        createDefaultArt('Prism Surge', 'prismatic_vortex')
     ];
 
     const saveToVault = () => {
@@ -299,6 +308,20 @@ const StudioManager = (() => {
         saveToVault();
         renderDashboard();
         openDesigner(newArt);
+    };
+
+    const applyActiveArtToUI = () => {
+        if (!activeArt) return;
+        document.getElementById('ui-style').value = activeArt.style;
+        document.getElementById('ui-speed').value = activeArt.speed;
+        document.getElementById('ui-scale').value = activeArt.scale;
+        document.getElementById('ui-complexity').value = activeArt.complexity;
+        document.getElementById('ui-detail').value = activeArt.detail;
+        document.getElementById('ui-c1').value = activeArt.c1;
+        document.getElementById('ui-c2').value = activeArt.c2;
+        document.getElementById('ui-c3').value = activeArt.c3;
+        document.getElementById('ui-brush-r').value = activeArt.brushR;
+        document.getElementById('ui-brush-i').value = activeArt.brushI;
     };
 
     const duplicateCurrent = () => {
@@ -363,16 +386,7 @@ const StudioManager = (() => {
         document.getElementById('active-art-name').innerText = art.name;
 
         // Sync UI
-        document.getElementById('ui-style').value = art.style;
-        document.getElementById('ui-speed').value = art.speed;
-        document.getElementById('ui-scale').value = art.scale;
-        document.getElementById('ui-complexity').value = art.complexity;
-        document.getElementById('ui-detail').value = art.detail;
-        document.getElementById('ui-c1').value = art.c1;
-        document.getElementById('ui-c2').value = art.c2;
-        document.getElementById('ui-c3').value = art.c3;
-        document.getElementById('ui-brush-r').value = art.brushR;
-        document.getElementById('ui-brush-i').value = art.brushI;
+        applyActiveArtToUI();
         document.getElementById('ui-aspect').value = 'story'; // Default aspect
 
         const container = document.getElementById('studio-canvas-container');
@@ -459,7 +473,9 @@ const StudioManager = (() => {
             cyber_grid: { p1: 'Grid Speed', p2: 'Tile Scale', p3: 'Data Chaos', p4: 'Electric Detail' },
             plasma_leak: { p1: 'Flow Speed', p2: 'Plasma Density', p3: 'Chaos Level', p4: 'Leak Intensity' },
             aurora_borealis: { p1: 'Drift Speed', p2: 'Light Scale', p3: 'Ray Complexity', p4: 'Glow Strength' },
-            fractal_mandelbulb: { p1: 'Pulse Speed', p2: 'Zoom Level', p3: 'Iteration Depth', p4: 'Edge Sharpness' }
+            fractal_mandelbulb: { p1: 'Pulse Speed', p2: 'Zoom Level', p3: 'Iteration Depth', p4: 'Edge Sharpness' },
+            stellar_ribbons: { p1: 'Drift Speed', p2: 'Ribbon Scale', p3: 'Orbit Chaos', p4: 'Glow Density' },
+            prismatic_vortex: { p1: 'Spin Speed', p2: 'Vortex Scale', p3: 'Prism Count', p4: 'Sparkle Strength' }
         };
 
         const currentLabels = styleLabels[activeArt.style] || styleLabels['ancient_sand'];
@@ -579,7 +595,82 @@ const StudioManager = (() => {
         setTimeout(() => t.classList.remove('visible'), 2500);
     };
 
-    return { init, createNewArt, deleteArt, closeDesigner, updateActiveParams, updateAspect, toggleRecording, exportProject, importProject, duplicateCurrent, getArtById, openDesigner };
+    const palettePresets = [
+        { c1: '#f8fafc', c2: '#6366f1', c3: '#050505' },
+        { c1: '#f472b6', c2: '#0ea5e9', c3: '#0b1120' },
+        { c1: '#facc15', c2: '#f97316', c3: '#09090b' },
+        { c1: '#22d3ee', c2: '#a855f7', c3: '#020617' },
+        { c1: '#a7f3d0', c2: '#34d399', c3: '#0a0a0a' },
+        { c1: '#fda4af', c2: '#c026d3', c3: '#0f172a' }
+    ];
+
+    const randomInRange = (min, max, precision = 3) => {
+        const value = Math.random() * (max - min) + min;
+        return parseFloat(value.toFixed(precision));
+    };
+
+    const setActiveArtValues = () => {
+        designerEngine.sync(activeArt);
+        applyActiveArtToUI();
+        updateLabels();
+        saveToVault();
+    };
+
+    const randomizePalette = (showMessage = true) => {
+        if (!activeArt) return;
+        const palette = palettePresets[Math.floor(Math.random() * palettePresets.length)];
+        activeArt.c1 = palette.c1;
+        activeArt.c2 = palette.c2;
+        activeArt.c3 = palette.c3;
+        setActiveArtValues();
+        if (showMessage) showToast('Palette regenerated');
+    };
+
+    const randomizeDynamics = (showMessage = true) => {
+        if (!activeArt) return;
+        activeArt.speed = randomInRange(0.0005, 0.008, 4);
+        activeArt.scale = randomInRange(2.0, 18.0, 1);
+        activeArt.complexity = randomInRange(2.0, 9.0, 1);
+        activeArt.detail = randomInRange(0.2, 0.9, 2);
+        activeArt.brushR = randomInRange(0.05, 0.25, 2);
+        activeArt.brushI = randomInRange(0.4, 1.6, 1);
+        setActiveArtValues();
+        if (showMessage) showToast('Motion reshaped');
+    };
+
+    const surpriseMe = () => {
+        if (!activeArt) return;
+        const styles = Object.keys(SHADER_STYLES);
+        activeArt.style = styles[Math.floor(Math.random() * styles.length)];
+        randomizePalette(false);
+        randomizeDynamics(false);
+        showToast('New universe unlocked');
+    };
+
+    const resetBrush = () => {
+        if (!designerEngine) return;
+        designerEngine.resetBrush();
+        showToast('Brush cleared');
+    };
+
+    return {
+        init,
+        createNewArt,
+        deleteArt,
+        closeDesigner,
+        updateActiveParams,
+        updateAspect,
+        toggleRecording,
+        exportProject,
+        importProject,
+        duplicateCurrent,
+        getArtById,
+        openDesigner,
+        randomizePalette,
+        randomizeDynamics,
+        surpriseMe,
+        resetBrush
+    };
 })();
 
 // Launch

@@ -105,6 +105,8 @@
                             <option value="plasma_leak">Plasma Leak / Nebula</option>
                             <option value="aurora_borealis">Aurora Borealis</option>
                             <option value="fractal_mandelbulb">Fractal Mandelbulb (2D)</option>
+                            <option value="stellar_ribbons">Stellar Ribbons</option>
+                            <option value="prismatic_vortex">Prismatic Vortex</option>
                         </select>
                     </div>
                 </div>
@@ -154,6 +156,16 @@
                             <label style="font-size:0.6rem">Canvas</label>
                             <input type="color" id="ui-c3" oninput="StudioManager.updateActiveParams()">
                         </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Creative Boost</div>
+                    <div class="action-grid">
+                        <button class="btn-action" onclick="StudioManager.randomizePalette()">Random Palette</button>
+                        <button class="btn-action" onclick="StudioManager.randomizeDynamics()">Shuffle Motion</button>
+                        <button class="btn-action" onclick="StudioManager.surpriseMe()">Surprise Me</button>
+                        <button class="btn-action" onclick="StudioManager.resetBrush()">Clear Brush</button>
                     </div>
                 </div>
 

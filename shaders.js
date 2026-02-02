@@ -533,6 +533,69 @@ const SHADER_STYLES = {
         }
     `,
 
+    // --- 13. STELLAR RIBBONS (New) ---
+    stellar_ribbons: `
+        void main() {
+            vec2 st = gl_FragCoord.xy / u_resolution.xy;
+            float aspect = u_resolution.x / u_resolution.y;
+            st.x *= aspect;
+            float brush = texture2D(u_brushTexture, vUv).r;
+
+            vec2 center = vec2(0.5 * aspect, 0.5);
+            vec2 uv = st - center;
+            float r = length(uv);
+            float angle = atan(uv.y, uv.x);
+
+            float t = u_time * (0.4 + u_speed * 20.0);
+            float warp = fbm(st * u_scale * 0.35 + u_offset + vec2(t * 0.2, -t * 0.15));
+            float waves = sin((angle + warp * 2.0 + r * (6.0 + u_complexity)) * 2.5);
+            float ribbon = smoothstep(-0.2, 0.6, waves);
+
+            float glow = pow(1.0 - r, 2.2) + brush * u_detail;
+            float mask = ribbon * glow;
+
+            float spark = noise(st * 40.0 + vec2(t)) * 0.2;
+            vec3 col = mix(u_c3, u_c2, mask);
+            col = mix(col, u_c1, pow(mask, 2.0) + spark);
+            col += u_c1 * brush * 0.8;
+
+            gl_FragColor = vec4(col, 1.0);
+        }
+    `,
+
+    // --- 14. PRISMATIC VORTEX (New) ---
+    prismatic_vortex: `
+        mat2 rotate2d(float a) {
+            return mat2(cos(a), -sin(a), sin(a), cos(a));
+        }
+
+        void main() {
+            vec2 st = gl_FragCoord.xy / u_resolution.xy;
+            float aspect = u_resolution.x / u_resolution.y;
+            st.x *= aspect;
+            float brush = texture2D(u_brushTexture, vUv).r;
+
+            vec2 center = vec2(0.5 * aspect, 0.5);
+            vec2 uv = st - center;
+            float t = u_time * (0.6 + u_speed * 18.0);
+            uv = rotate2d(t * 0.2) * uv;
+
+            float dist = length(uv);
+            float swirl = fbm(uv * (u_scale * 1.2) + u_offset * 0.2);
+            float rings = sin(dist * (10.0 + u_complexity * 2.0) - t * 3.0 + swirl * 4.0);
+            float band = smoothstep(-0.3, 0.5, rings);
+
+            float prism = sin((dist * 6.0 + t) + swirl * 3.0);
+            vec3 prismCol = mix(u_c1, u_c2, 0.5 + 0.5 * prism);
+
+            float core = smoothstep(0.5, 0.0, dist);
+            vec3 col = mix(u_c3, prismCol, band);
+            col = mix(col, u_c1, core * u_detail + brush * 0.7);
+
+            gl_FragColor = vec4(col, 1.0);
+        }
+    `,
+
     // --- ORIGINALS (Standard V2 - Kept for Legacy) ---
     ancient_sand: `
         void main() {

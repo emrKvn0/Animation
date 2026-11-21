@@ -1,7 +1,170 @@
 /**
- * COSMIC DUST STUDIO - CORE ENGINE v4.0
- * Logic & Controller
+ * COSMIC DUST STUDIO - CORE ENGINE v4.2
+ * Logic, Shader Catalog & Controller
  */
+
+/* --- SHADER CATALOG METADATA --- */
+const SHADER_CATEGORIES = ['All', 'Retro', 'Cosmic', 'Organic', 'Cyber', 'Fractal'];
+
+const SHADER_CATALOG = [
+    // NEW (Nov 2026)
+    {
+        id: 'synthwave_sunset', name: 'Synthwave Outrun Sunset', category: 'Retro', badge: 'NEW', added: 'Nov 2026',
+        tags: ['80s', 'Neon Grid', 'Mouse', 'CRT'],
+        desc: 'Retro sliced sunset, glowing neon mountain ridge, perspective laser grid & twinkling stars.',
+        labels: { p1: 'Cruise Speed', p2: 'Grid Scale', p3: 'Sun Stripes', p4: 'Sun Size' }
+    },
+    {
+        id: 'matrix_rain', name: 'Digital Matrix Rain', category: 'Cyber', badge: 'NEW', added: 'Nov 2026',
+        tags: ['Code Rain', 'Glyphs', 'Mouse', 'Terminal'],
+        desc: 'Cascading luminous digital glyph columns with bright leading heads and cursor pulse waves.',
+        labels: { p1: 'Fall Speed', p2: 'Column Density', p3: 'Trail Decay', p4: 'Drop Length' }
+    },
+    {
+        id: 'lava_lamp', name: 'Psychedelic Lava Lamp', category: 'Organic', badge: 'NEW', added: 'Nov 2026',
+        tags: ['Metaballs', 'Glossy', 'Mouse', 'Relaxing'],
+        desc: 'Floating glossy lava blobs that smoothly merge with an interactive cursor sphere.',
+        labels: { p1: 'Buoyancy', p2: 'Blob Size', p3: 'Color Wave', p4: 'Blend Softness' }
+    },
+    {
+        id: 'kaleidoscope_prism', name: 'Kaleidoscope Prism', category: 'Fractal', badge: 'NEW', added: 'Nov 2026',
+        tags: ['Symmetry', 'Mirrors', 'Psychedelic', 'Brush'],
+        desc: 'Hypnotic N-fold mirrored kaleidoscope with rotating chromatic ribbons and energy ripples.',
+        labels: { p1: 'Spin Speed', p2: 'Prism Zoom', p3: 'Mirror Slices', p4: 'Wave Density' }
+    },
+    {
+        id: 'neon_tunnel', name: 'Infinite Neon Wormhole', category: 'Cosmic', badge: 'NEW', added: 'Nov 2026',
+        tags: ['3D Tunnel', 'Warp', 'Mouse Steer', 'Portal'],
+        desc: 'Endless twisting neon wormhole flying through 3D space with mouse-steered vanishing point.',
+        labels: { p1: 'Warp Speed', p2: 'Tunnel Depth', p3: 'Twist & Spokes', p4: 'Line Sharpness' }
+    },
+    {
+        id: 'fireworks_bloom', name: 'Neon Fireworks Bloom', category: 'Retro', badge: 'NEW', added: 'Nov 2026',
+        tags: ['Particles', 'Sparks', 'Shockwave', 'Brush'],
+        desc: 'Looping firework bursts with sparkling trails, shockwave rings, and brush-triggered sparks.',
+        labels: { p1: 'Launch Rate', p2: 'Burst Radius', p3: 'Chaos', p4: 'Spark Spread' }
+    },
+
+    // REMASTERED (Feb 2026)
+    {
+        id: 'divine_mandala', name: 'Divine Mandala', category: 'Fractal', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Sacred', 'Geometry', 'Bloom', 'Brush'],
+        desc: 'Layered sacred geometry mandala with domain-warped bloom and interactive energy ripples.',
+        labels: { p1: 'Morphing Speed', p2: 'Pattern Density', p3: 'Layer Depth', p4: 'Bloom Sharpness' }
+    },
+    {
+        id: 'hyperspace_jump', name: 'Hyperspace Jump', category: 'Cosmic', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Starfield', 'Warp', 'Sci-Fi'],
+        desc: 'High-velocity starfield light-speed streaks pulling toward the center.',
+        labels: { p1: 'Warp Speed', p2: 'Star Density', p3: 'Complexity', p4: 'Streak Length' }
+    },
+    {
+        id: 'gravity_well', name: 'Gravity Well / Black Hole', category: 'Cosmic', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Lensing', 'Space', 'Event Horizon'],
+        desc: 'Gravitational lensing distortion around a dark cosmic singularity.',
+        labels: { p1: 'Warp Speed', p2: 'Field Scale', p3: 'Chaos', p4: 'Lensing Strength' }
+    },
+    {
+        id: 'aurora_borealis', name: 'Aurora Borealis', category: 'Cosmic', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Northern Lights', 'Atmosphere', 'Smooth'],
+        desc: 'Flowing polar light curtains drifting smoothly across the night sky.',
+        labels: { p1: 'Drift Speed', p2: 'Light Scale', p3: 'Ray Complexity', p4: 'Glow Strength' }
+    },
+    {
+        id: 'crystal_nebula', name: 'Crystal Nebula', category: 'Cosmic', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Crystalline', 'Nebula', 'Fractal'],
+        desc: 'Faceted crystalline nebula clouds with sharp luminous ridges.',
+        labels: { p1: 'Growth Speed', p2: 'Fractal Scale', p3: 'Complexity', p4: 'Sharpness' }
+    },
+    {
+        id: 'plasma_leak', name: 'Plasma Leak', category: 'Cosmic', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Plasma', 'Glow', 'Abstract'],
+        desc: 'Radiant plasma energy ribbons leaking across dark cosmic space.',
+        labels: { p1: 'Flow Speed', p2: 'Plasma Density', p3: 'Chaos Level', p4: 'Leak Intensity' }
+    },
+    {
+        id: 'fractal_mandelbulb', name: 'Fractal Mandelbulb (2D)', category: 'Fractal', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Fractal', 'Math', 'Recursive'],
+        desc: 'Recursive 2D fractal escape-time field with pulsing harmonic glow.',
+        labels: { p1: 'Pulse Speed', p2: 'Zoom Level', p3: 'Iteration Depth', p4: 'Edge Sharpness' }
+    },
+    {
+        id: 'topographic_lines', name: 'Topographic Isolines', category: 'Organic', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Terrain', 'Contour', 'Domain Warp', 'Brush'],
+        desc: 'Domain-warped elevation contour map with pseudo-normal lighting and shadows.',
+        labels: { p1: 'Flow Velocity', p2: 'Map Scale', p3: 'Line Density', p4: 'Line Thickness' }
+    },
+    {
+        id: 'metaballs_goo', name: 'Metaballs / Liquid Metal', category: 'Organic', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Slime', 'Specular', 'Fluid'],
+        desc: 'Viscous liquid metal droplets with specular rim lighting and smooth fusion.',
+        labels: { p1: 'Viscosity', p2: 'Goo Scale', p3: 'Fusion Power', p4: 'Surface Tension' }
+    },
+    {
+        id: 'aqueous_caustics', name: 'Aqueous Caustics', category: 'Organic', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Water', 'Refraction', 'Light'],
+        desc: 'Shimmering underwater caustic light rays refracting through waves.',
+        labels: { p1: 'Wave Speed', p2: 'Refraction Scale', p3: 'Ray Complexity', p4: 'Light Depth' }
+    },
+    {
+        id: 'voronoi_cells', name: 'Organic Cell Structure', category: 'Organic', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Voronoi', 'Bio', 'Cellular'],
+        desc: 'Living Voronoi cellular membrane network with pulsing walls.',
+        labels: { p1: 'Cell Vitality', p2: 'Cell Density', p3: 'Warp Factor', p4: 'Wall Thickness' }
+    },
+    {
+        id: 'neon_flow', name: 'Hyper Neon Fluid', category: 'Organic', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Fluid', 'Neon', 'Vapor'],
+        desc: 'Silk-smooth hyper-saturated neon fluid waves.',
+        labels: { p1: 'Fluid Speed', p2: 'Neon Thickness', p3: 'Vapor Complexity', p4: 'Glow Strength' }
+    },
+    {
+        id: 'cyber_grid', name: 'Glitch Cyber Grid', category: 'Cyber', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Cyberpunk', 'Grid', 'Electric'],
+        desc: 'Electrified cybernetic data grid with glitch pulses.',
+        labels: { p1: 'Grid Speed', p2: 'Tile Scale', p3: 'Data Chaos', p4: 'Electric Detail' }
+    },
+    {
+        id: 'electric_storm', name: 'Electric Storm', category: 'Cyber', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Lightning', 'Arcs', 'Energy'],
+        desc: 'Crackling high-voltage plasma arcs and lightning bolts.',
+        labels: { p1: 'Storm Intensity', p2: 'Frequency', p3: 'Bolt Count', p4: 'Bolt Thickness' }
+    },
+    {
+        id: 'chromatic_glitch', name: 'Chromatic Glitch', category: 'Cyber', badge: 'PRO', added: 'Feb 2026',
+        tags: ['RGB Split', 'Glitch', 'VHS'],
+        desc: 'RGB chromatic aberration tear and digital signal distortion.',
+        labels: { p1: 'Distort Speed', p2: 'Aberration Scale', p3: 'Noise Amount', p4: 'Color Separation' }
+    },
+    {
+        id: 'pixel_sorter', name: 'Pixel Sorter / Melt', category: 'Retro', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Glitch Art', 'Melting', 'Stripes'],
+        desc: 'Vertical melting pixel-sort streaks with dynamic glitch rate.',
+        labels: { p1: 'Melt Speed', p2: 'Stripe Scale', p3: 'Glitch Rate', p4: 'Melt Intensity' }
+    },
+    {
+        id: 'retro_dither', name: 'Retro Dither (Ordered)', category: 'Retro', badge: 'PRO', added: 'Feb 2026',
+        tags: ['Bayer', '1-Bit', 'Pixel Art'],
+        desc: 'Classic ordered Bayer matrix dithering with retro pulse waves.',
+        labels: { p1: 'Pulse Speed', p2: 'Resolution', p3: 'Dither Pattern', p4: 'Intensity' }
+    },
+
+    // ORIGINALS (Jan 2026)
+    {
+        id: 'ancient_sand', name: 'Ancient Sand', category: 'Organic', badge: 'CLASSIC', added: 'Jan 2026',
+        tags: ['Original', 'Grain', 'Fog'],
+        desc: 'Original v2 procedural desert sand grain and drifting atmospheric fog.',
+        labels: { p1: 'Erosion Speed', p2: 'Grain Density', p3: 'Complexity', p4: 'Sharpness' }
+    },
+    {
+        id: 'cosmic_dust', name: 'Cosmic Dust v2', category: 'Cosmic', badge: 'CLASSIC', added: 'Jan 2026',
+        tags: ['Original', 'Stardust', 'Shimmer'],
+        desc: 'Original v2 shimmering stardust clouds flowing through deep space.',
+        labels: { p1: 'Drift Speed', p2: 'Stardust Scale', p3: 'Chaos Level', p4: 'Brightness' }
+    }
+];
+
+const getShaderMeta = (id) => SHADER_CATALOG.find(s => s.id === id) || SHADER_CATALOG[0];
 
 /* --- CONSTANTS --- */
 const VERTEX_SHADER = `
@@ -57,7 +220,6 @@ const FRAGMENT_HEADER = `
         }
         return v;
     }
-    // Note: Advanced noises (simplex etc) are inside specific shader styles if needed
 `;
 
 /**
@@ -68,6 +230,7 @@ class VisualEngine {
         this.container = container;
         this.config = config;
         this.isPreview = isPreview;
+        this._cleanupEvents = null;
 
         // Brush Buffer
         this.brushCanvas = document.createElement('canvas');
@@ -85,7 +248,7 @@ class VisualEngine {
             u_resolution: { value: new THREE.Vector2() },
             u_offset: { value: new THREE.Vector2(Math.random() * 10, Math.random() * 10) },
             u_brushTexture: { value: this.brushTexture },
-            u_mouse: { value: new THREE.Vector3(0, 0, 0) },
+            u_mouse: { value: new THREE.Vector3(0.5, 0.5, 0) },
             u_c1: { value: new THREE.Color(config.c1) },
             u_c2: { value: new THREE.Color(config.c2) },
             u_c3: { value: new THREE.Color(config.c3) },
@@ -107,7 +270,6 @@ class VisualEngine {
         this.mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material);
         this.scene.add(this.mesh);
 
-        // Append first, then resize to ensure dimensions are read correctly
         container.appendChild(this.renderer.domElement);
         this.resize();
 
@@ -118,7 +280,7 @@ class VisualEngine {
         const w = this.container.offsetWidth;
         const h = this.container.offsetHeight;
         const r = this.isPreview ? 1 : Math.min(window.devicePixelRatio, 2);
-        
+
         if (w && h) {
             this.renderer.setSize(w, h, false);
             this.renderer.setPixelRatio(r);
@@ -136,12 +298,22 @@ class VisualEngine {
         this.uniforms.u_complexity.value = cfg.complexity;
         this.uniforms.u_detail.value = cfg.detail;
 
-        // Recompile if style changed
+        if (!cfg.brushEnabled) {
+            const guide = document.getElementById('brush-guide');
+            if (guide) guide.style.display = 'none';
+        }
+
         const newCode = FRAGMENT_HEADER + (SHADER_STYLES[cfg.style] || SHADER_STYLES['ancient_sand']);
         if (this.material.fragmentShader !== newCode) {
             this.material.fragmentShader = newCode;
             this.material.needsUpdate = true;
         }
+    }
+
+    clearBrush() {
+        this.brushCtx.fillStyle = 'black';
+        this.brushCtx.fillRect(0, 0, this.brushCanvas.width, this.brushCanvas.height);
+        this.brushTexture.needsUpdate = true;
     }
 
     setupEvents() {
@@ -151,27 +323,29 @@ class VisualEngine {
 
         const onKeyDown = (e) => { if (e.altKey) altPressed = true; };
         const onKeyUp = (e) => { if (e.key === 'Alt') altPressed = false; };
-        window.addEventListener('keydown', onKeyDown);
-        window.addEventListener('keyup', onKeyUp);
+        const onDown = (e) => { if (e.button === 0) isDown = true; };
+        const onUp = () => { isDown = false; };
+        const onLeave = () => { guide.style.display = 'none'; isDown = false; };
 
-        const onDown = () => isDown = true;
-        const onUp = () => isDown = false;
         const onMove = (e) => {
             const rect = this.container.getBoundingClientRect();
+            const inside = e.clientX >= rect.left && e.clientX <= rect.right &&
+                           e.clientY >= rect.top && e.clientY <= rect.bottom;
             const x = (e.clientX - rect.left) / rect.width;
             const y = (e.clientY - rect.top) / rect.height;
 
-            // Update Mouse Uniform
-            this.uniforms.u_mouse.value.set(x, 1.0 - y, 0); // Normalized
+            if (inside) {
+                this.uniforms.u_mouse.value.set(x, 1.0 - y, isDown ? 1 : 0);
+            }
 
-            if (altPressed) {
+            if (this.config.brushEnabled && inside && (isDown || altPressed)) {
                 guide.style.display = 'block';
                 guide.style.left = e.clientX + 'px';
                 guide.style.top = e.clientY + 'px';
                 guide.style.width = (this.config.brushR * 400) + 'px';
                 guide.style.height = (this.config.brushR * 400) + 'px';
 
-                if (isDown || e.buttons === 1) {
+                if (isDown || e.buttons === 1 || altPressed) {
                     this.paint(x, y);
                 }
             } else {
@@ -179,20 +353,33 @@ class VisualEngine {
             }
         };
 
+        window.addEventListener('keydown', onKeyDown);
+        window.addEventListener('keyup', onKeyUp);
         this.container.addEventListener('mousedown', onDown);
         window.addEventListener('mouseup', onUp);
         window.addEventListener('mousemove', onMove);
-        this.container.addEventListener('mouseleave', () => { guide.style.display = 'none'; });
+        this.container.addEventListener('mouseleave', onLeave);
+
+        this._cleanupEvents = () => {
+            window.removeEventListener('keydown', onKeyDown);
+            window.removeEventListener('keyup', onKeyUp);
+            this.container.removeEventListener('mousedown', onDown);
+            window.removeEventListener('mouseup', onUp);
+            window.removeEventListener('mousemove', onMove);
+            this.container.removeEventListener('mouseleave', onLeave);
+            guide.style.display = 'none';
+        };
     }
 
     paint(x, y) {
+        if (!this.config.brushEnabled) return;
         const ctx = this.brushCtx;
         const w = this.brushCanvas.width;
         const h = this.brushCanvas.height;
-        const r = this.config.brushR * w; // Relative radius
+        const r = this.config.brushR * w;
 
         const g = ctx.createRadialGradient(x * w, y * h, 0, x * w, y * h, r);
-        g.addColorStop(0, `rgba(255,255,255,${this.config.brushI * 0.1})`);
+        g.addColorStop(0, `rgba(255,255,255,${this.config.brushI * 0.12})`);
         g.addColorStop(1, `rgba(255,255,255,0)`);
 
         ctx.fillStyle = g;
@@ -203,7 +390,6 @@ class VisualEngine {
     }
 
     update() {
-        // Fade effect for brush
         if (this.brushCtx && Math.random() > 0.5) {
             this.brushCtx.fillStyle = 'rgba(0,0,0,0.015)';
             this.brushCtx.fillRect(0, 0, this.brushCanvas.width, this.brushCanvas.height);
@@ -217,6 +403,7 @@ class VisualEngine {
     }
 
     dispose() {
+        if (this._cleanupEvents) this._cleanupEvents();
         this.renderer.dispose();
         this.material.dispose();
         this.brushTexture.dispose();
@@ -232,6 +419,7 @@ const StudioManager = (() => {
     let activeArt = null;
     let engines = [];
     let designerEngine = null;
+    let activeCategory = 'All';
 
     const STORAGE_KEY = 'COSMIC_STUDIO_VAULT_V4';
 
@@ -239,6 +427,7 @@ const StudioManager = (() => {
 
     const init = () => {
         loadFromVault();
+        renderCategoryPills();
         renderDashboard();
         animate();
         setupGlobalListeners();
@@ -248,8 +437,7 @@ const StudioManager = (() => {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
             try {
-                arts = JSON.parse(saved);
-                arts = arts.map(fixArtProperties);
+                arts = JSON.parse(saved).map(fixArtProperties);
             } catch (e) {
                 console.error("Vault corrupted, resetting...", e);
                 arts = defaultCollection();
@@ -261,40 +449,39 @@ const StudioManager = (() => {
     };
 
     const defaultCollection = () => [
-        createDefaultArt('The First Spark', 'ancient_sand'),
-        createDefaultArt('Neon Dreams', 'neon_flow'),
-        createDefaultArt('Liquid Metal', 'metaballs_goo'),
-        createDefaultArt('Elevation Map', 'topographic_lines')
+        createDefaultArt('Outrun Horizon', 'synthwave_sunset', '#00f5d4', '#ff006e', '#05010f'),
+        createDefaultArt('Neon Wormhole', 'neon_tunnel', '#e0aaff', '#7b2cbf', '#05020d'),
+        createDefaultArt('Matrix Pulse', 'matrix_rain', '#52ff9a', '#00a86b', '#010a05'),
+        createDefaultArt('Lava Dreams', 'lava_lamp', '#ffb703', '#fb5607', '#0c0402')
     ];
 
     const saveToVault = () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(arts));
     };
 
-    const fixArtProperties = (art) => {
-        return {
-            id: art.id || Date.now() + Math.random(),
-            name: art.name || 'Untitled Project',
-            style: art.style || 'ancient_sand',
-            speed: art.speed ?? 0.001,
-            scale: art.scale ?? 5.0,
-            complexity: art.complexity ?? 4.0,
-            detail: art.detail ?? 0.5,
-            c1: art.c1 || '#ffffff',
-            c2: art.c2 || '#4f46e5',
-            c3: art.c3 || '#000000',
-            brushR: art.brushR ?? 0.1,
-            brushI: art.brushI ?? 1.0
-        };
-    };
+    const fixArtProperties = (art) => ({
+        id: art.id || Date.now() + Math.random(),
+        name: art.name || 'Untitled Project',
+        style: art.style || 'synthwave_sunset',
+        aspect: art.aspect || 'cinema',
+        speed: art.speed ?? 0.001,
+        scale: art.scale ?? 5.0,
+        complexity: art.complexity ?? 4.0,
+        detail: art.detail ?? 0.5,
+        c1: art.c1 || '#00f5d4',
+        c2: art.c2 || '#6366f1',
+        c3: art.c3 || '#050508',
+        brushEnabled: art.brushEnabled ?? true,
+        brushR: art.brushR ?? 0.1,
+        brushI: art.brushI ?? 1.0
+    });
 
-    const createDefaultArt = (name, style) => {
-        const art = fixArtProperties({ name, style });
-        return art;
+    const createDefaultArt = (name, style = 'synthwave_sunset', c1, c2, c3) => {
+        return fixArtProperties({ name, style, c1, c2, c3 });
     };
 
     const createNewArt = () => {
-        const newArt = createDefaultArt('Untitled masterpiece #' + (arts.length + 1));
+        const newArt = createDefaultArt('Masterpiece #' + (arts.length + 1), 'synthwave_sunset');
         arts.unshift(newArt);
         saveToVault();
         renderDashboard();
@@ -312,7 +499,7 @@ const StudioManager = (() => {
 
     const getArtById = (id) => arts.find(a => a.id.toString() === id.toString());
 
-    // --- RENDERING ---
+    // --- DASHBOARD RENDERING ---
 
     const renderDashboard = () => {
         const grid = document.getElementById('art-grid');
@@ -322,17 +509,23 @@ const StudioManager = (() => {
         engines = [];
 
         arts.forEach((art) => {
+            const meta = getShaderMeta(art.style);
+            const badgeClass = meta.badge === 'NEW' ? 'badge-new' : meta.badge === 'PRO' ? 'badge-pro' : 'badge-classic';
             const card = document.createElement('div');
             card.className = 'art-card';
             card.innerHTML = `
                 <div class="canvas-stub" id="stub-${art.id}"></div>
                 <div class="card-actions">
-                    <button class="btn-action" style="padding:6px 12px; font-size:10px; width:auto; background:var(--accent)" onclick="event.stopPropagation(); StudioManager.openDesigner(StudioManager.getArtById('${art.id}'))">Edit Master</button>
-                    <button class="btn-action" style="padding:6px 12px; font-size:10px; width:auto; border-color:rgba(255,0,0,0.3)" onclick="event.stopPropagation(); StudioManager.deleteArt('${art.id}')">Delete</button>
+                    <button class="btn-action" style="padding:5px 10px; font-size:11px; width:auto; background:var(--accent); border-color:var(--accent)" onclick="event.stopPropagation(); StudioManager.openDesigner(StudioManager.getArtById('${art.id}'))">Edit</button>
+                    <button class="btn-action" style="padding:5px 10px; font-size:11px; width:auto; border-color:rgba(239,68,68,0.4)" onclick="event.stopPropagation(); StudioManager.deleteArt('${art.id}')">Delete</button>
                 </div>
                 <div class="art-info">
                     <h3>${art.name}</h3>
-                    <p>${art.style.replace(/_/g, ' ')}</p>
+                    <div class="art-info-sub">
+                        <span class="badge ${badgeClass}">${meta.category}</span>
+                        <span>${meta.name}</span>
+                        <span>• ${meta.added}</span>
+                    </div>
                 </div>
             `;
 
@@ -340,47 +533,154 @@ const StudioManager = (() => {
             grid.appendChild(card);
 
             const container = document.getElementById(`stub-${art.id}`);
-            // Small Optimization: Use simple shader for thumbnails? No, Keep Full Quality for Premium feel.
             const engine = new VisualEngine(container, art, true);
             engines.push(engine);
         });
     };
 
     const deleteArt = (id) => {
-        if (!confirm("Are you sure? This cannot be undone.")) return;
+        if (!confirm("Delete this project? This cannot be undone.")) return;
         arts = arts.filter(a => a.id.toString() !== id.toString());
         saveToVault();
         renderDashboard();
     };
 
+    // --- SIDEBAR TABS & SHADER CATALOG ---
+
+    const switchTab = (tabName) => {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tabName);
+        });
+        document.querySelectorAll('.tab-pane').forEach(pane => {
+            pane.classList.toggle('active', pane.id === `tab-${tabName}`);
+        });
+    };
+
+    const renderCategoryPills = () => {
+        const wrap = document.getElementById('category-pills');
+        if (!wrap) return;
+        wrap.innerHTML = SHADER_CATEGORIES.map(cat => {
+            const count = cat === 'All'
+                ? SHADER_CATALOG.length
+                : SHADER_CATALOG.filter(s => s.category === cat).length;
+            return `<button class="cat-pill ${cat === activeCategory ? 'active' : ''}" onclick="StudioManager.selectCategory('${cat}')">${cat} (${count})</button>`;
+        }).join('');
+    };
+
+    const selectCategory = (cat) => {
+        activeCategory = cat;
+        renderCategoryPills();
+        renderShaderCatalog();
+    };
+
+    const renderShaderCatalog = () => {
+        const listEl = document.getElementById('shader-list');
+        const activeMetaEl = document.getElementById('active-shader-meta');
+        if (!listEl || !activeArt) return;
+
+        const currentMeta = getShaderMeta(activeArt.style);
+        const currentBadgeClass = currentMeta.badge === 'NEW' ? 'badge-new' : currentMeta.badge === 'PRO' ? 'badge-pro' : 'badge-classic';
+
+        if (activeMetaEl) {
+            activeMetaEl.innerHTML = `
+                <div class="active-shader-top">
+                    <span class="active-shader-title">${currentMeta.name}</span>
+                    <div class="shader-badges">
+                        <span class="badge ${currentBadgeClass}">${currentMeta.badge}</span>
+                        <span class="badge badge-classic">${currentMeta.added}</span>
+                    </div>
+                </div>
+                <p class="active-shader-desc">${currentMeta.desc}</p>
+                <div class="tag-row">
+                    <span class="tag-chip" style="color:#a5b4fc">${currentMeta.category}</span>
+                    ${currentMeta.tags.map(t => `<span class="tag-chip">#${t}</span>`).join('')}
+                </div>
+            `;
+        }
+
+        const query = (document.getElementById('shader-search')?.value || '').trim().toLowerCase();
+        const filtered = SHADER_CATALOG.filter(s => {
+            const matchCat = activeCategory === 'All' || s.category === activeCategory;
+            if (!matchCat) return false;
+            if (!query) return true;
+            return (
+                s.name.toLowerCase().includes(query) ||
+                s.category.toLowerCase().includes(query) ||
+                s.added.toLowerCase().includes(query) ||
+                s.desc.toLowerCase().includes(query) ||
+                s.tags.some(t => t.toLowerCase().includes(query))
+            );
+        });
+
+        if (filtered.length === 0) {
+            listEl.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-dim); font-size:0.8rem;">No shaders match "${query}"</div>`;
+            return;
+        }
+
+        listEl.innerHTML = filtered.map(s => {
+            const bClass = s.badge === 'NEW' ? 'badge-new' : s.badge === 'PRO' ? 'badge-pro' : 'badge-classic';
+            const selected = activeArt.style === s.id ? 'selected' : '';
+            return `
+                <div class="shader-item ${selected}" onclick="StudioManager.selectShader('${s.id}')">
+                    <div class="shader-item-head">
+                        <span class="shader-item-name">${s.name}</span>
+                        <div class="shader-badges">
+                            <span class="badge ${bClass}">${s.badge}</span>
+                        </div>
+                    </div>
+                    <div class="shader-item-meta">
+                        <span class="shader-item-cat">${s.category}</span>
+                        <span>Added ${s.added}</span>
+                    </div>
+                    <div class="tag-row">
+                        ${s.tags.map(t => `<span class="tag-chip">#${t}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    };
+
+    const selectShader = (styleId) => {
+        if (!activeArt || !designerEngine) return;
+        activeArt.style = styleId;
+        designerEngine.sync(activeArt);
+        updateLabels();
+        renderShaderCatalog();
+        saveToVault();
+    };
+
     // --- DESIGNER LOGIC ---
 
     const openDesigner = (art) => {
-        activeArt = art;
+        activeArt = fixArtProperties(art);
+        const idx = arts.findIndex(a => a.id.toString() === activeArt.id.toString());
+        if (idx >= 0) arts[idx] = activeArt;
+
         const designer = document.getElementById('designer');
         designer.classList.add('active');
+        document.getElementById('active-art-name').innerText = activeArt.name;
 
-        document.getElementById('active-art-name').innerText = art.name;
-
-        // Sync UI
-        document.getElementById('ui-style').value = art.style;
-        document.getElementById('ui-speed').value = art.speed;
-        document.getElementById('ui-scale').value = art.scale;
-        document.getElementById('ui-complexity').value = art.complexity;
-        document.getElementById('ui-detail').value = art.detail;
-        document.getElementById('ui-c1').value = art.c1;
-        document.getElementById('ui-c2').value = art.c2;
-        document.getElementById('ui-c3').value = art.c3;
-        document.getElementById('ui-brush-r').value = art.brushR;
-        document.getElementById('ui-brush-i').value = art.brushI;
-        document.getElementById('ui-aspect').value = 'story'; // Default aspect
+        // Sync inputs
+        document.getElementById('ui-speed').value = activeArt.speed;
+        document.getElementById('ui-scale').value = activeArt.scale;
+        document.getElementById('ui-complexity').value = activeArt.complexity;
+        document.getElementById('ui-detail').value = activeArt.detail;
+        document.getElementById('ui-c1').value = activeArt.c1;
+        document.getElementById('ui-c2').value = activeArt.c2;
+        document.getElementById('ui-c3').value = activeArt.c3;
+        document.getElementById('ui-brush-r').value = activeArt.brushR;
+        document.getElementById('ui-brush-i').value = activeArt.brushI;
+        document.getElementById('ui-brush-enabled').checked = activeArt.brushEnabled;
 
         const container = document.getElementById('studio-canvas-container');
         container.innerHTML = '';
-        designerEngine = new VisualEngine(container, art, false);
+        designerEngine = new VisualEngine(container, activeArt, false);
 
-        updateAspect();
+        setAspect(activeArt.aspect || 'cinema');
+        syncBrushUI();
         updateLabels();
+        renderShaderCatalog();
+        switchTab('shaders');
     };
 
     const closeDesigner = () => {
@@ -397,7 +697,6 @@ const StudioManager = (() => {
     const updateActiveParams = () => {
         if (!activeArt || !designerEngine) return;
 
-        activeArt.style = document.getElementById('ui-style').value;
         activeArt.speed = parseFloat(document.getElementById('ui-speed').value);
         activeArt.scale = parseFloat(document.getElementById('ui-scale').value);
         activeArt.complexity = parseFloat(document.getElementById('ui-complexity').value);
@@ -413,18 +712,56 @@ const StudioManager = (() => {
         saveToVault();
     };
 
-    const updateAspect = () => {
-        const aspect = document.getElementById('ui-aspect').value;
+    const applyPalette = (c1, c2, c3) => {
+        if (!activeArt) return;
+        document.getElementById('ui-c1').value = c1;
+        document.getElementById('ui-c2').value = c2;
+        document.getElementById('ui-c3').value = c3;
+        updateActiveParams();
+        showToast("Palette Applied!");
+    };
+
+    const toggleBrush = (enabled) => {
+        if (!activeArt || !designerEngine) return;
+        activeArt.brushEnabled = enabled;
+        if (!enabled) designerEngine.clearBrush();
+        designerEngine.sync(activeArt);
+        syncBrushUI();
+        saveToVault();
+        showToast(enabled ? "Brush Enabled" : "Brush Disabled");
+    };
+
+    const clearBrush = () => {
+        if (designerEngine) {
+            designerEngine.clearBrush();
+            showToast("Brush Cleared");
+        }
+    };
+
+    const syncBrushUI = () => {
+        if (!activeArt) return;
+        const wrap = document.getElementById('brush-controls-wrap');
+        const status = document.getElementById('status-brush');
+        if (wrap) wrap.classList.toggle('disabled', !activeArt.brushEnabled);
+        if (status) {
+            status.textContent = activeArt.brushEnabled ? 'Brush: ON (Drag / ALT)' : 'Brush: OFF';
+            status.className = `status-pill ${activeArt.brushEnabled ? 'on' : 'off'}`;
+        }
+    };
+
+    const setAspect = (aspect) => {
         const container = document.getElementById('studio-canvas-container');
-        
-        // Clear all previous classes and styles
-        container.className = '';
-        
-        // Force a specific class based on aspect
-        container.classList.add(`preview-aspect-${aspect}`);
-        
-        // Fullscreen specific logic
-        if(aspect === 'full') {
+        if (activeArt) {
+            activeArt.aspect = aspect;
+            saveToVault();
+        }
+
+        document.querySelectorAll('.aspect-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.aspect === aspect);
+        });
+
+        container.className = `preview-aspect-${aspect}`;
+        if (aspect === 'full') {
             container.style.width = '100%';
             container.style.height = '100%';
             container.style.maxWidth = 'none';
@@ -436,38 +773,15 @@ const StudioManager = (() => {
             container.style.maxHeight = '';
         }
 
-        // Delay resize slightly to allow CSS transition/layout update
         setTimeout(() => {
-            if(designerEngine) designerEngine.resize();
-        }, 100);
+            if (designerEngine) designerEngine.resize();
+        }, 80);
     };
 
     const updateLabels = () => {
         if (!activeArt) return;
-
-        const styleLabels = {
-            ancient_sand: { p1: 'Erosion Speed', p2: 'Grain Density', p3: 'Complexity', p4: 'Sharpness' },
-            cosmic_dust: { p1: 'Drift Speed', p2: 'Stardust Scale', p3: 'Chaos Level', p4: 'Brightness' },
-            topographic_lines: { p1: 'Flow Velocity', p2: 'Map Scale', p3: 'Line Density', p4: 'Line Thickness' },
-            metaballs_goo: { p1: 'Viscosity', p2: 'Goo Scale', p3: 'Fusion Power', p4: 'Surface Tension' },
-            aqueous_caustics: { p1: 'Wave Speed', p2: 'Refraction Scale', p3: 'Ray Complexity', p4: 'Light depth' },
-            retro_dither: { p1: 'Pulse Speed', p2: 'Resolution', p3: 'Dither Pattern', p4: 'Intensity' },
-            pixel_sorter: { p1: 'Melt Speed', p2: 'Stripe Scale', p3: 'Glitch Rate', p4: 'Melt Intensity' },
-            chromatic_glitch: { p1: 'Distort Speed', p2: 'Aberration Scale', p3: 'Noise amount', p4: 'Color Separation' },
-            neon_flow: { p1: 'Fluid Speed', p2: 'Neon Thickness', p3: 'Vapor Complexity', p4: 'Glow Strength' },
-            voronoi_cells: { p1: 'Cell Vitality', p2: 'Cell Density', p3: 'Warp Factor', p4: 'Wall Thickness' },
-            cyber_grid: { p1: "Grid Speed", p2: "Tile Scale", p3: "Data Chaos", p4: "Electric Detail" },
-            electric_storm: { p1: "Storm Intensity", p2: "Frequency", p3: "Bolt Count", p4: "Bolt Thickness" },
-            gravity_well: { p1: "Warp Speed", p2: "Field Scale", p3: "Chaos", p4: "Lensing Strength" },
-            crystal_nebula: { p1: "Growth Speed", p2: "Fractal Scale", p3: "Complexity", p4: "Sharpness" },
-            plasma_leak: { p1: "Flow Speed", p2: "Plasma Density", p3: "Chaos Level", p4: "Leak Intensity" },
-            aurora_borealis: { p1: "Drift Speed", p2: "Light Scale", p3: "Ray Complexity", p4: "Glow Strength" },
-            fractal_mandelbulb: { p1: "Pulse Speed", p2: "Zoom Level", p3: "Iteration Depth", p4: "Edge Sharpness" },
-            hyperspace_jump: { p1: "Warp Speed", p2: "Star Density", p3: "Complexity", p4: "Streak Length" },
-            divine_mandala: { p1: "Morphing Speed", p2: "Pattern Density", p3: "Layer Depth", p4: "Bloom/Sharpness" }
-        };
-
-        const currentLabels = styleLabels[activeArt.style] || styleLabels['ancient_sand'];
+        const meta = getShaderMeta(activeArt.style);
+        const currentLabels = meta.labels;
 
         document.getElementById('studio-label-speed').innerText = currentLabels.p1;
         document.getElementById('studio-label-scale').innerText = currentLabels.p2;
@@ -543,7 +857,7 @@ const StudioManager = (() => {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `CosmicMaster_${activeArt.name.replace(/\s+/g, '_')}_${Date.now()}.mp4`;
+                a.download = `CosmicMaster_${activeArt.name.replace(/\s+/g, '_')}_${Date.now()}.webm`;
                 a.click();
                 designerEngine.resize();
                 showToast("Render Finished!");
@@ -571,6 +885,7 @@ const StudioManager = (() => {
         });
 
         window.addEventListener('keydown', (e) => {
+            if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
             if (e.key.toLowerCase() === 'z') document.getElementById('zoom-wrapper').classList.add('zoomed');
         });
         window.addEventListener('keyup', (e) => {
@@ -584,7 +899,12 @@ const StudioManager = (() => {
         setTimeout(() => t.classList.remove('visible'), 2500);
     };
 
-    return { init, createNewArt, deleteArt, closeDesigner, updateActiveParams, updateAspect, toggleRecording, exportProject, importProject, duplicateCurrent, getArtById, openDesigner };
+    return {
+        init, createNewArt, deleteArt, closeDesigner, updateActiveParams,
+        setAspect, toggleRecording, exportProject, importProject, duplicateCurrent,
+        getArtById, openDesigner, switchTab, selectCategory, renderShaderCatalog,
+        selectShader, applyPalette, toggleBrush, clearBrush
+    };
 })();
 
 // Launch

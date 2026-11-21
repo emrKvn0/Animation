@@ -665,7 +665,7 @@ const SHADER_STYLES = {
         }
     `,
 
-    // --- 17. DIVINE MANDALA (Sacred Geometry Lotus & Polar SDF Edition) ---
+    // --- 17. DIVINE MANDALA (Organic Seamless Kaleidoscope & Ridged FBM Edition) ---
     divine_mandala: `
         #define DM_PI 3.14159265359
         #define DM_TAU 6.28318530718
@@ -675,144 +675,163 @@ const SHADER_STYLES = {
             return mat2(c, -s, s, c);
         }
 
-        // Exact Vesica Piscis SDF (creates crisp pointed lotus petals)
-        float dm_sdVesica(vec2 p, float r, float d) {
-            p = abs(p);
-            float b = sqrt(max(r * r - d * d, 0.0001));
-            return ((p.y - b) * d > p.x * b)
-                ? length(p - vec2(0.0, b))
-                : length(p - vec2(-d, 0.0)) - r;
+        // Smooth value noise for organic botanical/fractal detail
+        float dm_hash(vec2 p) {
+            p = fract(p * vec2(234.34, 435.345));
+            p += dot(p, p + 34.23);
+            return fract(p.x * p.y);
         }
 
-        // Fold 2D coordinates into N symmetrical angular wedges
-        vec2 dm_fold(vec2 p, float n, float rotAngle) {
-            p = dm_rot(rotAngle) * p;
-            float a = atan(p.y, p.x);
-            float r = length(p);
-            float sector = DM_TAU / n;
-            a = mod(a + sector * 0.5, sector) - sector * 0.5;
-            a = abs(a);
-            return vec2(cos(a), sin(a)) * r;
+        float dm_noise(vec2 p) {
+            vec2 i = floor(p);
+            vec2 f = fract(p);
+            vec2 u = f * f * (3.0 - 2.0 * f);
+            float a = dm_hash(i);
+            float b = dm_hash(i + vec2(1.0, 0.0));
+            float c = dm_hash(i + vec2(0.0, 1.0));
+            float d = dm_hash(i + vec2(1.0, 1.0));
+            return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
         }
 
-        // Crisp glowing filigree stroke from any SDF
-        float dm_stroke(float d, float w, float glowBoost) {
-            float core = smoothstep(w, w * 0.15, abs(d));
-            float halo = exp(-abs(d) * (36.0 - glowBoost * 16.0)) * (0.28 + glowBoost * 0.35);
-            return core + halo;
+        // Ridged multifractal FBM (creates organic foliage, coral & vein filigree)
+        float dm_ridgedFbm(vec2 p, float detailBoost) {
+            float sum = 0.0;
+            float amp = 0.55;
+            mat2 m = mat2(1.62, 1.22, -1.22, 1.62);
+            for (int i = 0; i < 6; i++) {
+                float n = dm_noise(p);
+                float ridge = 1.0 - abs(n * 2.0 - 1.0);
+                ridge = ridge * ridge;
+                sum += ridge * amp;
+                p = m * p + vec2(1.7, 9.2);
+                amp *= mix(0.46, 0.56, detailBoost);
+            }
+            return sum;
+        }
+
+        float dm_softFbm(vec2 p) {
+            float sum = 0.0;
+            float amp = 0.5;
+            mat2 m = mat2(1.6, 1.2, -1.2, 1.6);
+            for (int i = 0; i < 4; i++) {
+                sum += dm_noise(p) * amp;
+                p = m * p;
+                amp *= 0.5;
+            }
+            return sum;
+        }
+
+        // Inigo Quilez Cosine Color Palette (seamless hue cycle)
+        vec3 dm_cosinePalette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
+            return a + b * cos(DM_TAU * (c * t + d));
+        }
+
+        // Evaluate organic mandala field at a given phase offset (for chromatic aberration & normals)
+        vec3 dm_evalField(vec2 uv, float t, float folds, float scaleVal, float detailVal, float brush) {
+            // Polar coordinates (r, theta)
+            float r = length(uv);
+            float theta = atan(uv.y, uv.x);
+
+            // Seamless rotational drift + radial wave breathing
+            float sector = DM_TAU / folds;
+            float rotAngle = t * 0.14 + sin(t * 0.6 - r * 2.2) * 0.06;
+            theta += rotAngle;
+
+            // Mirror kaleidoscope folding (zero overlap, seamless seams)
+            float a = mod(theta, sector);
+            a = abs(a - sector * 0.5);
+
+            // Endless scaling loop via log-radial flow + cyclic 4D-like orbit
+            float logR = log(max(r, 0.008));
+            float flowR = logR * (1.1 + scaleVal * 0.06) - t * 0.42;
+
+            // Reconstruct seamless folded Cartesian coordinates for texture sampling
+            vec2 kp = vec2(cos(a), sin(a)) * (0.45 + r * (1.8 + scaleVal * 0.14));
+            vec2 flowCoord = vec2(flowR, a * folds * 0.45);
+
+            // Cyclic circular noise motion (cos(t), sin(t)) for organic seamless breathing
+            vec2 loopDrift = vec2(cos(t * 0.5), sin(t * 0.5)) * 0.65;
+
+            // 2-stage domain warping for rich botanical / coral symmetry
+            vec2 q = vec2(
+                dm_softFbm(kp * 1.4 + flowCoord * 0.55 + loopDrift),
+                dm_softFbm(kp * 1.4 + flowCoord * 0.55 - loopDrift + vec2(5.2, 1.3))
+            );
+
+            vec2 warped = kp * 2.1 + flowCoord * 0.7 + q * (1.45 + brush * 0.9);
+            float ridged = dm_ridgedFbm(warped, detailVal);
+            float soft = dm_softFbm(warped * 0.75 - q * 0.8);
+
+            // Fine crystalline/mossy micro-filigree
+            float micro = dm_ridgedFbm(warped * 3.2 + q * 1.5, detailVal);
+
+            return vec3(ridged, soft, micro);
         }
 
         void main() {
             vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
             float brush = texture2D(u_brushTexture, vUv).r;
-            float t = u_time * (0.35 + u_speed * 130.0);
+            float r = length(uv);
 
-            // Subtle breathing zoom controlled by u_scale
-            float breath = 1.0 + 0.025 * sin(t * 1.1);
-            float zoom = mix(1.35, 0.72, clamp((u_scale - 0.5) / 29.5, 0.0, 1.0));
-            vec2 p = uv * zoom * breath;
-            float r = length(p);
+            // Cyclic time driven by u_speed
+            float t = u_time * (0.45 + u_speed * 150.0);
 
-            // Even symmetry count (6, 8, 10, 12, 14, 16) from u_complexity
+            // Clean even symmetry (6, 8, 10, 12, 14, 16) from u_complexity
             float folds = floor(3.0 + u_complexity * 0.65) * 2.0;
-            float sector = DM_TAU / folds;
 
-            // Filigree width & glow controlled by u_detail
-            float lw = mix(0.0085, 0.0038, u_detail);
-            float glowAmt = 0.25 + u_detail * 0.75;
+            // Subtle mouse center shift
+            vec2 mShift = (u_mouse.xy - 0.5) * 0.12;
+            vec2 p = uv - mShift * smoothstep(0.0, 0.9, r);
 
-            // Deep sacred radial backdrop
-            vec3 col = mix(u_c3 * 0.35, u_c3 * 0.08, smoothstep(0.0, 1.25, r));
-            col += mix(u_c2, u_c1, 0.4) * exp(-r * 2.6) * 0.18;
+            // Subtle chromatic aberration (RGB phase split)
+            float ca = 0.018 * (0.4 + u_detail * 0.6);
+            vec3 fR = dm_evalField(p, t + ca, folds, u_scale, u_detail, brush);
+            vec3 fG = dm_evalField(p, t,      folds, u_scale, u_detail, brush);
+            vec3 fB = dm_evalField(p, t - ca, folds, u_scale, u_detail, brush);
 
-            // 1. CENTER BINDU & SEED OF LIFE (r < 0.17)
-            float bindu = smoothstep(0.032, 0.008, r);
-            col += mix(u_c1, vec3(1.0), 0.55) * bindu * 1.25;
-            vec2 seedP = dm_fold(p, 6.0, t * 0.22);
-            float seedCircle = abs(length(seedP - vec2(0.075, 0.0)) - 0.075);
-            col += u_c1 * dm_stroke(seedCircle, lw * 0.85, glowAmt) * 0.85 * smoothstep(0.20, 0.14, r);
+            // Pseudo-3D tactile relief shading via finite differences
+            float eps = 0.004;
+            float hC = fG.x * 0.65 + fG.z * 0.35;
+            float hX = dm_evalField(p + vec2(eps, 0.0), t, folds, u_scale, u_detail, brush).x * 0.65;
+            float hY = dm_evalField(p + vec2(0.0, eps), t, folds, u_scale, u_detail, brush).x * 0.65;
+            vec3 normal = normalize(vec3((hC - hX) * 6.0, (hC - hY) * 6.0, 0.35));
+            float light = 0.55 + 0.55 * max(dot(normal, normalize(vec3(0.4, 0.7, 1.0))), 0.0);
+            float ao = smoothstep(0.18, 0.95, hC);
 
-            // 2. INNER SACRED DOUBLE RING + PEARL BEADS (r ~ 0.19 - 0.23)
-            float innerRing1 = abs(r - 0.175);
-            float innerRing2 = abs(r - 0.225);
-            col += u_c1 * dm_stroke(innerRing1, lw, glowAmt) * 0.95;
-            col += u_c2 * dm_stroke(innerRing2, lw * 0.8, glowAmt) * 0.8;
+            // Rich cosine palette (warm center -> emerald/cyan/luminous outer) blended with user colors
+            float hueT = r * 0.55 - t * 0.06 + fG.y * 0.65;
+            vec3 iqCol = dm_cosinePalette(
+                hueT,
+                vec3(0.52, 0.48, 0.46),
+                vec3(0.46, 0.44, 0.42),
+                vec3(1.0, 1.0, 1.0),
+                vec3(0.05, 0.28, 0.58)
+            );
 
-            vec2 beadP1 = dm_fold(p, folds, -t * 0.18);
-            float bead1 = length(beadP1 - vec2(0.20, 0.0)) - 0.011;
-            col += mix(u_c1, vec3(1.0), 0.35) * smoothstep(0.004, -0.002, bead1) * 1.1;
+            // Blend user chromatics harmoniously with the iridescent cosine spectrum
+            vec3 userGrad = mix(u_c3, mix(u_c2, u_c1, smoothstep(0.25, 0.85, fG.x)), smoothstep(0.15, 0.9, fG.y));
+            vec3 baseCol = mix(iqCol, userGrad, 0.42);
 
-            // 3. INNER LOTUS PETAL CROWN (r: 0.22 -> 0.46)
-            vec2 pInner = dm_fold(p, folds, t * 0.14);
-            // Rotate Vesica so pointed tip aims radially outward along +X
-            vec2 lp1 = vec2(pInner.y, pInner.x - 0.34);
-            float dPetal1 = dm_sdVesica(lp1, 0.155, 0.095);
-            float fill1 = smoothstep(0.006, -0.02, dPetal1);
-            float dPetal1In = dm_sdVesica(lp1, 0.115, 0.075);
-            col += mix(u_c2, u_c1, smoothstep(0.22, 0.45, r)) * fill1 * 0.22;
-            col += u_c1 * dm_stroke(dPetal1, lw * 1.05, glowAmt) * 0.95;
-            col += u_c2 * dm_stroke(dPetal1In, lw * 0.75, glowAmt) * 0.65;
+            // Combine RGB channels with subtle chromatic shimmer on organic ridges
+            vec3 ridgeGlow = vec3(fR.z, fG.z, fB.z);
+            vec3 col = baseCol * (0.45 + 0.75 * ao) * light;
+            col += mix(iqCol, u_c1, 0.5) * pow(ridgeGlow, vec3(2.2)) * (0.45 + u_detail * 0.55);
 
-            // Inner petal tip jewel
-            float tip1 = length(pInner - vec2(0.465, 0.0)) - 0.010;
-            col += mix(u_c1, vec3(1.0), 0.4) * smoothstep(0.005, -0.002, tip1);
+            // Luminous Bindu center star glow
+            float bindu = exp(-r * 6.5) * (0.45 + 0.25 * sin(t * 2.0));
+            col += mix(u_c1, vec3(1.0, 0.92, 0.75), 0.5) * bindu;
 
-            // 4. MID SACRED GEOMETRY STAR & FILIGREE RING (r ~ 0.48 - 0.56)
-            vec2 pStar = dm_fold(p, folds, -t * 0.12 + sector * 0.5);
-            // Diamond / Yantra facet between inner petals
-            vec2 sp = pStar - vec2(0.46, 0.0);
-            float dDiamond = (abs(sp.x) * 0.85 + abs(sp.y) * 1.55) - 0.085;
-            col += u_c2 * dm_stroke(dDiamond, lw * 0.9, glowAmt) * 0.85;
-            col += u_c2 * smoothstep(0.005, -0.02, dDiamond) * 0.14;
-
-            float midRing = abs(r - 0.535);
-            col += u_c1 * dm_stroke(midRing, lw * 0.9, glowAmt) * 0.85;
-
-            // 5. OUTER GRAND LOTUS PETALS (offset half-sector, r: 0.52 -> 0.84)
-            vec2 pOuter = dm_fold(p, folds, t * 0.08 + sector * 0.5);
-            vec2 lp2 = vec2(pOuter.y, pOuter.x - 0.675);
-            float dPetal2 = dm_sdVesica(lp2, 0.225, 0.135);
-            float dPetal2In = dm_sdVesica(lp2, 0.175, 0.112);
-            float fill2 = smoothstep(0.008, -0.03, dPetal2);
-
-            vec3 outerGrad = mix(u_c2, u_c1, smoothstep(0.50, 0.85, r));
-            col += outerGrad * fill2 * 0.20;
-            col += outerGrad * dm_stroke(dPetal2, lw * 1.1, glowAmt) * 1.05;
-            col += u_c1 * dm_stroke(dPetal2In, lw * 0.7, glowAmt) * 0.65;
-
-            // Central vein inside each outer lotus petal
-            float veinMask = smoothstep(0.55, 0.60, pOuter.x) * smoothstep(0.81, 0.76, pOuter.x);
-            col += u_c1 * dm_stroke(pOuter.y, lw * 0.55, glowAmt * 0.6) * veinMask * 0.55;
-
-            // Outer petal crown pearl
-            float tip2 = length(pOuter - vec2(0.865, 0.0)) - 0.014;
-            col += mix(u_c1, vec3(1.0), 0.45) * (smoothstep(0.005, -0.002, tip2) + exp(-max(tip2, 0.0) * 35.0) * 0.4);
-
-            // 6. OUTER SCALLOPED LACE & HALO RINGS (r ~ 0.84 - 0.96)
-            vec2 pLace = dm_fold(p, folds * 2.0, -t * 0.06);
-            float laceArch = abs(length(pLace - vec2(0.87, 0.0)) - 0.055);
-            col += u_c2 * dm_stroke(laceArch, lw * 0.75, glowAmt) * 0.7 * smoothstep(0.84, 0.88, r);
-
-            float outerRing1 = abs(r - 0.935);
-            float outerRing2 = abs(r - 0.965);
-            col += u_c1 * dm_stroke(outerRing1, lw * 0.95, glowAmt) * 0.9;
-            col += u_c2 * dm_stroke(outerRing2, lw * 0.65, glowAmt) * 0.6;
-
-            // Subtle outer radiating aura
-            float aura = exp(-abs(r - 0.95) * 8.0) * 0.22;
-            col += mix(u_c2, u_c1, 0.5) * aura;
-
-            // 7. INTERACTIVE MOUSE & BRUSH ENERGY RIPPLES
-            vec2 mPos = (u_mouse.xy * 2.0 - 1.0) * vec2(u_resolution.x / min(u_resolution.x, u_resolution.y), u_resolution.y / min(u_resolution.x, u_resolution.y)) * zoom;
-            col += u_c1 * exp(-length(p - mPos) * 5.0) * 0.22;
+            // Interactive brush luminous ripple
             if (brush > 0.01) {
-                float ripple = 0.5 + 0.5 * sin(r * 26.0 - t * 6.0);
-                col += mix(u_c1, u_c2, ripple) * brush * (0.65 + 0.35 * ripple);
+                float wave = 0.5 + 0.5 * sin(r * 22.0 - t * 6.0);
+                col += mix(u_c1, iqCol, 0.5) * brush * (0.6 + 0.4 * wave);
             }
 
-            // Soft vignette & punchy tone curve
-            col *= smoothstep(1.55, 0.75, r);
-            col = pow(max(col, 0.0), vec3(0.88));
+            // Clean filmic contrast & subtle vignette
+            col *= smoothstep(1.55, 0.55, r);
+            col = col / (1.0 + col * 0.35);
+            col = pow(max(col, 0.0), vec3(0.92));
+
             gl_FragColor = vec4(col, 1.0);
         }
     `,

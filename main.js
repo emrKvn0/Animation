@@ -59,36 +59,6 @@ const SHADER_CATALOG = [
         labels: { p1: 'Warp Speed', p2: 'Star Density', p3: 'Complexity', p4: 'Streak Length' }
     },
     {
-        id: 'gravity_well', name: 'Gravity Well / Black Hole', category: 'Cosmic', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Lensing', 'Space', 'Event Horizon'],
-        desc: 'Gravitational lensing distortion around a dark cosmic singularity.',
-        labels: { p1: 'Warp Speed', p2: 'Field Scale', p3: 'Chaos', p4: 'Lensing Strength' }
-    },
-    {
-        id: 'aurora_borealis', name: 'Aurora Borealis', category: 'Cosmic', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Northern Lights', 'Atmosphere', 'Smooth'],
-        desc: 'Flowing polar light curtains drifting smoothly across the night sky.',
-        labels: { p1: 'Drift Speed', p2: 'Light Scale', p3: 'Ray Complexity', p4: 'Glow Strength' }
-    },
-    {
-        id: 'crystal_nebula', name: 'Crystal Nebula', category: 'Cosmic', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Crystalline', 'Nebula', 'Fractal'],
-        desc: 'Faceted crystalline nebula clouds with sharp luminous ridges.',
-        labels: { p1: 'Growth Speed', p2: 'Fractal Scale', p3: 'Complexity', p4: 'Sharpness' }
-    },
-    {
-        id: 'plasma_leak', name: 'Plasma Leak', category: 'Cosmic', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Plasma', 'Glow', 'Abstract'],
-        desc: 'Radiant plasma energy ribbons leaking across dark cosmic space.',
-        labels: { p1: 'Flow Speed', p2: 'Plasma Density', p3: 'Chaos Level', p4: 'Leak Intensity' }
-    },
-    {
-        id: 'fractal_mandelbulb', name: 'Fractal Mandelbulb (2D)', category: 'Fractal', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Fractal', 'Math', 'Recursive'],
-        desc: 'Recursive 2D fractal escape-time field with pulsing harmonic glow.',
-        labels: { p1: 'Pulse Speed', p2: 'Zoom Level', p3: 'Iteration Depth', p4: 'Edge Sharpness' }
-    },
-    {
         id: 'topographic_lines', name: 'Topographic Isolines', category: 'Organic', badge: 'PRO', added: 'Feb 2026',
         tags: ['Terrain', 'Contour', 'Domain Warp', 'Brush'],
         desc: 'Domain-warped elevation contour map with pseudo-normal lighting and shadows.',
@@ -131,36 +101,10 @@ const SHADER_CATALOG = [
         labels: { p1: 'Storm Intensity', p2: 'Frequency', p3: 'Bolt Count', p4: 'Bolt Thickness' }
     },
     {
-        id: 'chromatic_glitch', name: 'Chromatic Glitch', category: 'Cyber', badge: 'PRO', added: 'Feb 2026',
-        tags: ['RGB Split', 'Glitch', 'VHS'],
-        desc: 'RGB chromatic aberration tear and digital signal distortion.',
-        labels: { p1: 'Distort Speed', p2: 'Aberration Scale', p3: 'Noise Amount', p4: 'Color Separation' }
-    },
-    {
-        id: 'pixel_sorter', name: 'Pixel Sorter / Melt', category: 'Retro', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Glitch Art', 'Melting', 'Stripes'],
-        desc: 'Vertical melting pixel-sort streaks with dynamic glitch rate.',
-        labels: { p1: 'Melt Speed', p2: 'Stripe Scale', p3: 'Glitch Rate', p4: 'Melt Intensity' }
-    },
-    {
         id: 'retro_dither', name: 'Retro Dither (Ordered)', category: 'Retro', badge: 'PRO', added: 'Feb 2026',
         tags: ['Bayer', '1-Bit', 'Pixel Art'],
         desc: 'Classic ordered Bayer matrix dithering with retro pulse waves.',
         labels: { p1: 'Pulse Speed', p2: 'Resolution', p3: 'Dither Pattern', p4: 'Intensity' }
-    },
-
-    // ORIGINALS (Jan 2026)
-    {
-        id: 'ancient_sand', name: 'Ancient Sand', category: 'Organic', badge: 'CLASSIC', added: 'Jan 2026',
-        tags: ['Original', 'Grain', 'Fog'],
-        desc: 'Original v2 procedural desert sand grain and drifting atmospheric fog.',
-        labels: { p1: 'Erosion Speed', p2: 'Grain Density', p3: 'Complexity', p4: 'Sharpness' }
-    },
-    {
-        id: 'cosmic_dust', name: 'Cosmic Dust v2', category: 'Cosmic', badge: 'CLASSIC', added: 'Jan 2026',
-        tags: ['Original', 'Stardust', 'Shimmer'],
-        desc: 'Original v2 shimmering stardust clouds flowing through deep space.',
-        labels: { p1: 'Drift Speed', p2: 'Stardust Scale', p3: 'Chaos Level', p4: 'Brightness' }
     }
 ];
 
@@ -259,7 +203,7 @@ class VisualEngine {
             u_seed: { value: Math.random() * 100 }
         };
 
-        const shaderCode = (SHADER_STYLES[config.style] || SHADER_STYLES['ancient_sand']);
+        const shaderCode = (SHADER_STYLES[config.style] || SHADER_STYLES['synthwave_sunset']);
 
         this.material = new THREE.ShaderMaterial({
             vertexShader: VERTEX_SHADER,
@@ -303,7 +247,7 @@ class VisualEngine {
             if (guide) guide.style.display = 'none';
         }
 
-        const newCode = FRAGMENT_HEADER + (SHADER_STYLES[cfg.style] || SHADER_STYLES['ancient_sand']);
+        const newCode = FRAGMENT_HEADER + (SHADER_STYLES[cfg.style] || SHADER_STYLES['synthwave_sunset']);
         if (this.material.fragmentShader !== newCode) {
             this.material.fragmentShader = newCode;
             this.material.needsUpdate = true;

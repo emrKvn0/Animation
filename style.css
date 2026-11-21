@@ -154,9 +154,27 @@ body, html {
     display: block;
 }
 
-.preview-aspect-story { width: 360px; height: 640px; }
-.preview-aspect-cinema { width: 800px; height: 450px; }
-.preview-aspect-square { width: 500px; height: 500px; }
+.preview-aspect-story {
+    height: 92%;
+    max-height: 92vh;
+    aspect-ratio: 9 / 16;
+    width: auto;
+    max-width: 96%;
+}
+.preview-aspect-cinema {
+    width: 96%;
+    max-width: 1500px;
+    aspect-ratio: 16 / 9;
+    height: auto;
+    max-height: 92%;
+}
+.preview-aspect-square {
+    height: 90%;
+    max-height: 90vh;
+    aspect-ratio: 1 / 1;
+    width: auto;
+    max-width: 96%;
+}
 .preview-aspect-full { 
     width: 100% !important; 
     height: 100% !important; 
@@ -168,7 +186,7 @@ body, html {
     background: radial-gradient(circle at center, #1a1a1a, #000); 
     display: flex; justify-content: center; align-items: center; 
     overflow: hidden;
-    padding: 40px;
+    padding: 16px;
 }
 
 #zoom-wrapper {

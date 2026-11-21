@@ -43,7 +43,7 @@
     <div id="designer">
         <div class="viewer-container" id="viewport">
             <div id="zoom-wrapper" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
-                <div id="studio-canvas-container" class="preview-aspect-story"></div>
+                <div id="studio-canvas-container" class="preview-aspect-cinema"></div>
             </div>
             <div class="designer-overlay"></div>
             <div id="brush-guide"></div>
@@ -77,8 +77,8 @@
                     <div class="control-block">
                         <label class="control-label">Preview Aspect</label>
                         <select id="ui-aspect" onchange="StudioManager.updateAspect()">
+                            <option value="cinema" selected>16:9 Cinema (Landscape)</option>
                             <option value="story">9:16 Story (Portrait)</option>
-                            <option value="cinema">16:9 Cinema (Landscape)</option>
                             <option value="square">1:1 Square</option>
                             <option value="full">Auto / Fullscreen</option>
                         </select>

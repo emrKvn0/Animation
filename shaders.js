@@ -742,6 +742,302 @@ const SHADER_STYLES = {
         }
     `,
 
+    // --- 20. SYNTHWAVE OUTRUN SUNSET ---
+    synthwave_sunset: `
+        void main() {
+            vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+            vec2 p = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
+            float brush = texture2D(u_brushTexture, vUv).r;
+            float t = u_time * (0.6 + u_speed * 180.0);
+
+            // Mouse subtle horizon tilt
+            float horizon = -0.06 + (u_mouse.y - 0.5) * 0.12;
+
+            // Sky gradient
+            vec3 skyTop = u_c3;
+            vec3 skyMid = mix(u_c3, u_c2, 0.55);
+            vec3 skyBot = mix(u_c2, u_c1, 0.65);
+            float skyT = clamp((p.y - horizon) / 0.6, 0.0, 1.0);
+            vec3 col = mix(skyBot, mix(skyMid, skyTop, smoothstep(0.25, 1.0, skyT)), smoothstep(0.0, 0.55, skyT));
+
+            // Twinkling stars above horizon
+            if (p.y > horizon) {
+                vec2 starGrid = floor((p + vec2(t * 0.01, 0.0)) * (45.0 + u_scale * 4.0));
+                float starRnd = hash(starGrid);
+                if (starRnd > 0.985) {
+                    float twinkle = 0.5 + 0.5 * sin(t * 4.0 + starRnd * 100.0);
+                    col += u_c1 * twinkle * smoothstep(horizon, horizon + 0.35, p.y) * 0.9;
+                }
+
+                // Retro sliced sun
+                vec2 sunPos = vec2((u_mouse.x - 0.5) * 0.15, horizon + 0.22);
+                float sunR = 0.16 + u_detail * 0.1;
+                float dSun = length(p - sunPos);
+                if (dSun < sunR) {
+                    float sy = (p.y - (sunPos.y - sunR)) / (2.0 * sunR);
+                    float stripe = sin((p.y - t * 0.04) * (55.0 + u_complexity * 8.0));
+                    float cutMask = smoothstep(-0.1, 0.1, stripe + sy * 1.4 - 0.35);
+                    vec3 sunCol = mix(u_c2, u_c1, sy);
+                    col = mix(col, sunCol * 1.35, cutMask);
+                }
+                // Sun outer glow
+                col += mix(u_c2, u_c1, 0.5) * exp(-dSun * 6.5) * 0.65;
+
+                // Mountain silhouette
+                float mX = p.x * (2.5 + u_scale * 0.15) + u_offset.x * 0.5;
+                float mH = horizon + (fbm(vec2(mX, 1.7)) * 0.14 + 0.02) * (1.0 - smoothstep(0.0, 0.45, abs(p.x)));
+                if (p.y < mH) {
+                    col = mix(u_c3 * 0.4, u_c2 * 0.35, smoothstep(horizon, mH, p.y));
+                    // Neon rim on mountain ridge
+                    col += u_c1 * smoothstep(0.008, 0.0, abs(p.y - mH)) * 0.9;
+                }
+            } else {
+                // Perspective scrolling laser grid
+                float depth = max(horizon - p.y, 0.003);
+                float z = 0.35 / depth;
+                float x = p.x * z;
+                float gridScale = 1.2 + u_scale * 0.15;
+                float gx = abs(fract(x * gridScale) - 0.5);
+                float gz = abs(fract(z * gridScale - t * 1.8) - 0.5);
+                float lineW = 0.02 + (1.0 - u_detail) * 0.04;
+                float grid = max(smoothstep(lineW, 0.0, gx), smoothstep(lineW, 0.0, gz));
+                float fade = exp(-depth * 2.2);
+                vec3 floorCol = u_c3 * 0.35;
+                vec3 gridCol = mix(u_c2, u_c1, clamp(1.0 - depth * 3.0, 0.0, 1.0));
+                col = floorCol + gridCol * grid * (1.4 - fade * 0.4);
+                col += u_c1 * exp(-depth * 28.0) * 0.9;
+            }
+
+            // Brush synth energy burst
+            col += u_c1 * brush * (0.8 + 0.4 * sin(t * 8.0));
+            // Subtle CRT scanlines
+            col *= 0.92 + 0.08 * sin(gl_FragCoord.y * 1.5);
+            gl_FragColor = vec4(col, 1.0);
+        }
+    `,
+
+    // --- 21. DIGITAL MATRIX RAIN ---
+    matrix_rain: `
+        float mr_glyph(vec2 uv, float seed) {
+            vec2 g = floor(uv * 5.0);
+            float h = hash(g + floor(seed * 20.0));
+            float border = step(0.12, uv.x) * step(uv.x, 0.88) * step(0.12, uv.y) * step(uv.y, 0.88);
+            return step(0.45, h) * border;
+        }
+        void main() {
+            vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+            uv.x *= u_resolution.x / u_resolution.y;
+            float brush = texture2D(u_brushTexture, vUv).r;
+            float t = u_time * (1.2 + u_speed * 260.0);
+
+            float cols = 18.0 + u_scale * 2.5;
+            vec2 grid = uv * cols;
+            vec2 cellId = floor(grid);
+            vec2 cellUv = fract(grid);
+
+            float colRand = hash(vec2(cellId.x, 13.7));
+            float colSpeed = 0.8 + colRand * (1.4 + u_complexity * 0.2);
+            float dropY = fract(uv.y * (1.2 + u_detail) + t * colSpeed * 0.18 + colRand * 10.0);
+
+            // Bright leading head & decaying tail
+            float trail = pow(1.0 - dropY, 2.2 + u_complexity * 0.5);
+            float head = smoothstep(0.06, 0.0, dropY);
+
+            // Animated glyph character
+            float charSeed = hash(cellId + floor(t * (2.0 + colRand * 4.0)) * 0.01);
+            float glyph = mr_glyph(cellUv, charSeed);
+
+            // Mouse pulse wave
+            vec2 mPos = u_mouse.xy;
+            mPos.x *= u_resolution.x / u_resolution.y;
+            float mGlow = exp(-length(uv - mPos) * 5.0) * 0.8;
+
+            vec3 rainCol = mix(u_c2, u_c1, head + brush * 0.7);
+            vec3 col = u_c3 * 0.25 + rainCol * glyph * (trail * 1.4 + head * 1.6 + brush + mGlow);
+            col += u_c1 * head * 0.35;
+
+            gl_FragColor = vec4(col, 1.0);
+        }
+    `,
+
+    // --- 22. PSYCHEDELIC LAVA LAMP ---
+    lava_lamp: `
+        float ll_smin(float a, float b, float k) {
+            float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+            return mix(b, a, h) - k * h * (1.0 - h);
+        }
+        void main() {
+            vec2 p = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
+            float brush = texture2D(u_brushTexture, vUv).r;
+            float t = u_time * (0.45 + u_speed * 140.0);
+
+            float field = 10.0;
+            float k = 0.18 + u_detail * 0.18;
+
+            for (int i = 0; i < 8; i++) {
+                float fi = float(i);
+                float x = sin(t * (0.4 + fi * 0.11) + fi * 2.1) * (0.32 + 0.08 * sin(t + fi));
+                float y = cos(t * (0.3 + fi * 0.09) + fi * 1.7) * 0.42;
+                float r = (0.09 + 0.05 * sin(fi * 3.1 + t * 0.5)) * (0.7 + u_scale * 0.04);
+                float d = length(p - vec2(x, y)) - r;
+                field = ll_smin(field, d, k);
+            }
+
+            // Mouse interactive blob
+            vec2 m = (u_mouse.xy - 0.5) * vec2(u_resolution.x / u_resolution.y, 1.0);
+            field = ll_smin(field, length(p - m) - (0.08 + brush * 0.15), k);
+            field -= brush * 0.14;
+
+            // Smooth glossy lava shading
+            float body = smoothstep(0.015, -0.015, field);
+            float core = smoothstep(0.0, -0.14, field);
+            float rim = smoothstep(0.03, 0.0, abs(field));
+
+            // Background ambient glow
+            vec3 bg = mix(u_c3, u_c2 * 0.45, smoothstep(-0.6, 0.6, p.y));
+            bg += u_c2 * exp(-max(field, 0.0) * 6.0) * 0.4;
+
+            vec3 lava = mix(u_c2, u_c1, core * 0.85 + 0.15 * sin(p.y * (4.0 + u_complexity) - t));
+            // Specular highlight illusion
+            float spec = smoothstep(-0.04, -0.12, field + (p.x * 0.04 - p.y * 0.04));
+            lava += vec3(1.0) * spec * 0.25;
+
+            vec3 col = mix(bg, lava, body) + u_c1 * rim * 0.55;
+            gl_FragColor = vec4(col, 1.0);
+        }
+    `,
+
+    // --- 23. KALEIDOSCOPE PRISM ---
+    kaleidoscope_prism: `
+        void main() {
+            vec2 p = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
+            float brush = texture2D(u_brushTexture, vUv).r;
+            float t = u_time * (0.5 + u_speed * 150.0);
+
+            // Polar coordinates
+            float r = length(p);
+            float a = atan(p.y, p.x);
+
+            // N-fold mirror symmetry controlled by complexity
+            float segments = floor(4.0 + u_complexity * 1.4);
+            float sector = 6.2831853 / segments;
+            a = mod(a + t * 0.15, sector);
+            a = abs(a - sector * 0.5);
+
+            vec2 kp = vec2(cos(a), sin(a)) * r;
+
+            // Mouse offset & brush warp
+            kp += (u_mouse.xy - 0.5) * 0.25;
+            kp *= (1.5 + u_scale * 0.25);
+
+            vec3 col = u_c3 * 0.2;
+            for (int i = 0; i < 4; i++) {
+                float fi = float(i);
+                kp = abs(kp) / max(dot(kp, kp), 0.15) - vec2(0.75 + 0.15 * sin(t * 0.6 + fi), 0.55 + 0.15 * cos(t * 0.5 - fi));
+                float wave = sin(length(kp) * (5.0 + u_detail * 6.0) - t * 2.0 + fi);
+                float glow = 0.025 / (abs(wave) + 0.025);
+                vec3 layerCol = mix(u_c1, u_c2, 0.5 + 0.5 * sin(fi * 1.8 + t + r * 3.0));
+                col += layerCol * glow * 0.28;
+            }
+
+            col += u_c1 * brush * (0.6 + 0.4 * sin(r * 18.0 - t * 6.0));
+            col *= smoothstep(1.3, 0.15, r);
+            gl_FragColor = vec4(col, 1.0);
+        }
+    `,
+
+    // --- 24. INFINITE NEON WORMHOLE ---
+    neon_tunnel: `
+        void main() {
+            vec2 p = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
+            float brush = texture2D(u_brushTexture, vUv).r;
+            float t = u_time * (0.9 + u_speed * 220.0);
+
+            // Mouse steers the tunnel vanishing point
+            vec2 center = (u_mouse.xy - 0.5) * 0.35;
+            vec2 q = p - center;
+
+            float r = max(length(q), 0.002);
+            float angle = atan(q.y, q.x);
+
+            // Polar tunnel mapping with twist
+            float z = (0.45 + u_scale * 0.04) / r + t * 1.4;
+            float twist = angle + sin(z * 0.4 + t * 0.5) * (0.3 + u_complexity * 0.12) + brush * 1.5;
+
+            float spokes = floor(6.0 + u_complexity * 1.5);
+            float ringLine = smoothstep(0.08 + (1.0 - u_detail) * 0.12, 0.0, abs(fract(z) - 0.5));
+            float spokeLine = smoothstep(0.06 + (1.0 - u_detail) * 0.1, 0.0, abs(fract(twist * spokes / 6.2831853) - 0.5));
+
+            float pulse = 0.5 + 0.5 * sin(z * 3.0 - t * 4.0);
+            vec3 ringCol = mix(u_c2, u_c1, pulse);
+            vec3 spokeCol = mix(u_c1, u_c2, 0.5 + 0.5 * cos(angle * 2.0 + t));
+
+            float fog = smoothstep(0.02, 0.55, r);
+            vec3 col = u_c3 * 0.25 + (ringCol * ringLine * 1.4 + spokeCol * spokeLine * 0.9) * fog;
+            // Core portal glow at vanishing point
+            col += u_c1 * exp(-r * 7.0) * (1.1 + brush);
+
+            gl_FragColor = vec4(col, 1.0);
+        }
+    `,
+
+    // --- 25. NEON FIREWORKS BLOOM ---
+    fireworks_bloom: `
+        vec2 fw_hash2(float n) {
+            return fract(sin(vec2(n, n + 1.234)) * vec2(43758.5453, 22578.1459));
+        }
+        void main() {
+            vec2 p = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
+            float brush = texture2D(u_brushTexture, vUv).r;
+            float t = u_time * (0.7 + u_speed * 160.0);
+
+            vec3 col = u_c3 * 0.25;
+
+            // Subtle starry backdrop
+            vec2 sId = floor(p * 70.0);
+            float sR = hash(sId);
+            if (sR > 0.988) {
+                col += u_c2 * (0.4 + 0.4 * sin(t * 3.0 + sR * 50.0)) * 0.5;
+            }
+
+            // 5 looping firework shells
+            for (int b = 0; b < 5; b++) {
+                float fb = float(b);
+                float cycle = floor(t * 0.55 + fb * 0.37);
+                float localT = fract(t * 0.55 + fb * 0.37);
+                vec2 rnd = fw_hash2(cycle * 17.3 + fb * 31.7);
+                vec2 center = (rnd - 0.5) * vec2(1.1, 0.65);
+
+                // Expanding shockwave ring
+                float ringR = localT * (0.32 + u_scale * 0.015);
+                float ring = smoothstep(0.015, 0.0, abs(length(p - center) - ringR)) * (1.0 - localT);
+                vec3 burstCol = mix(u_c1, u_c2, fract(fb * 0.31 + cycle * 0.17));
+                col += burstCol * ring * 0.45;
+
+                // Spark particles
+                int sparks = 18;
+                for (int s = 0; s < 18; s++) {
+                    float fs = float(s);
+                    float ang = (fs / float(sparks)) * 6.2831853 + rnd.x * 6.28 + sin(fs * 3.7) * 0.2;
+                    float spd = (0.18 + 0.25 * hash(vec2(fs, cycle + fb))) * (0.7 + u_detail * 0.7);
+                    vec2 vel = vec2(cos(ang), sin(ang)) * spd;
+                    vec2 pos = center + vel * localT + vec2(0.0, -0.18 * localT * localT);
+                    float d = length(p - pos);
+                    float fade = (1.0 - localT) * smoothstep(0.0, 0.08, localT);
+                    float sparkle = 0.6 + 0.4 * sin(t * 20.0 + fs * 12.0);
+                    col += burstCol * (0.0022 / (d + 0.0025)) * fade * sparkle;
+                }
+            }
+
+            // Interactive brush & mouse spark glow
+            vec2 m = (u_mouse.xy - 0.5) * vec2(u_resolution.x / u_resolution.y, 1.0);
+            col += u_c1 * (0.008 / (length(p - m) + 0.02)) * 0.35;
+            col += mix(u_c1, u_c2, 0.5) * brush * (0.9 + 0.4 * sin(t * 15.0));
+
+            gl_FragColor = vec4(col, 1.0);
+        }
+    `,
+
     // --- ORIGINALS (Standard V2 - Kept for Legacy) ---
     ancient_sand: `
         void main() {

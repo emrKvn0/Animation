@@ -456,10 +456,15 @@ const StudioManager = (() => {
             chromatic_glitch: { p1: 'Distort Speed', p2: 'Aberration Scale', p3: 'Noise amount', p4: 'Color Separation' },
             neon_flow: { p1: 'Fluid Speed', p2: 'Neon Thickness', p3: 'Vapor Complexity', p4: 'Glow Strength' },
             voronoi_cells: { p1: 'Cell Vitality', p2: 'Cell Density', p3: 'Warp Factor', p4: 'Wall Thickness' },
-            cyber_grid: { p1: 'Grid Speed', p2: 'Tile Scale', p3: 'Data Chaos', p4: 'Electric Detail' },
-            plasma_leak: { p1: 'Flow Speed', p2: 'Plasma Density', p3: 'Chaos Level', p4: 'Leak Intensity' },
-            aurora_borealis: { p1: 'Drift Speed', p2: 'Light Scale', p3: 'Ray Complexity', p4: 'Glow Strength' },
-            fractal_mandelbulb: { p1: 'Pulse Speed', p2: 'Zoom Level', p3: 'Iteration Depth', p4: 'Edge Sharpness' }
+            cyber_grid: { p1: "Grid Speed", p2: "Tile Scale", p3: "Data Chaos", p4: "Electric Detail" },
+            electric_storm: { p1: "Storm Intensity", p2: "Frequency", p3: "Bolt Count", p4: "Bolt Thickness" },
+            gravity_well: { p1: "Warp Speed", p2: "Field Scale", p3: "Chaos", p4: "Lensing Strength" },
+            crystal_nebula: { p1: "Growth Speed", p2: "Fractal Scale", p3: "Complexity", p4: "Sharpness" },
+            plasma_leak: { p1: "Flow Speed", p2: "Plasma Density", p3: "Chaos Level", p4: "Leak Intensity" },
+            aurora_borealis: { p1: "Drift Speed", p2: "Light Scale", p3: "Ray Complexity", p4: "Glow Strength" },
+            fractal_mandelbulb: { p1: "Pulse Speed", p2: "Zoom Level", p3: "Iteration Depth", p4: "Edge Sharpness" },
+            hyperspace_jump: { p1: "Warp Speed", p2: "Star Density", p3: "Complexity", p4: "Streak Length" },
+            divine_mandala: { p1: "Morphing Speed", p2: "Pattern Density", p3: "Layer Depth", p4: "Bloom/Sharpness" }
         };
 
         const currentLabels = styleLabels[activeArt.style] || styleLabels['ancient_sand'];

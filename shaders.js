@@ -88,19 +88,30 @@ const SHADER_STYLES = {
             float lineThickness = 0.05 + (1.0-u_detail) * 0.2; 
             float lineMask = smoothstep(lineThickness, lineThickness - 0.01, abs(lineVal));
             
-            float dh = t_fbm((st + vec2(0.01)) * u_scale * 0.2 + 2.0*r) - height;
-            float light = smoothstep(-0.02, 0.05, dh);
+            // Calculate pseudo-normal from height
+            vec2 e = vec2(0.001, 0.0);
+            float hX = t_fbm((st + e.xy) * u_scale * 0.2 + 2.0*r) - height;
+            float hY = t_fbm((st + e.yx) * u_scale * 0.2 + 2.0*r) - height;
+            vec3 normal = normalize(vec3(-hX, -hY, 0.01));
             
-            vec3 baseCol = mix(u_c3, u_c2 * 0.3, light * 0.5); 
-            baseCol = mix(baseCol, u_c2, height * 0.4);
+            float diff = max(dot(normal, normalize(vec3(1.0, 1.0, 1.0))), 0.0);
+            float shadow = smoothstep(0.01, -0.01, hX + hY);
+            
+            vec3 baseCol = mix(u_c3, u_c2 * 0.4, diff); 
+            baseCol = mix(baseCol, u_c2, height * 0.5);
             vec3 finalCol = mix(baseCol, u_c1, lineMask);
+            
+            // Add subtle ambient occlusion
+            finalCol *= 0.8 + 0.2 * smoothstep(0.0, 0.1, height);
+            finalCol -= shadow * 0.1;
+            
             finalCol -= (t_random(st*100.0) - 0.5) * 0.05;
 
             gl_FragColor = vec4(finalCol, 1.0);
         }
     `,
 
-    // --- 2. METABALLS / SLIME (Fixed & High-End) ---
+    // --- 2. METABALLS / SLIME (Enhanced with Specular & Rim) ---
     metaballs_goo: `
         vec2 hash2( vec2 p ) {
             return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);
@@ -117,7 +128,7 @@ const SHADER_STYLES = {
             float brush = texture2D(u_brushTexture, vUv).r;
 
             vec3 bg = u_c3;
-            bg += 0.05 * sin(st.x * 20.0) * sin(st.y * 20.0);
+            bg += 0.05 * sin(st.x * 20.0 + u_time) * sin(st.y * 20.0 - u_time);
 
             float d = 100.0; 
             int numBalls = int(u_complexity) * 3 + 4;
@@ -126,14 +137,11 @@ const SHADER_STYLES = {
             for(int i=0; i<20; i++) {
                 if(i >= numBalls) break;
                 float t = u_time * u_speed * 10.0 + float(i)*10.0;
-                vec2 vel = 2.0 * hash2(vec2(float(i))) - 1.0; 
                 vec2 pos = vec2(0.5 * u_resolution.x/u_resolution.y, 0.5); 
                 pos += vec2(
                     cos(t * 0.5 + float(i)) * 0.4 * scale,
                     sin(t * 0.7 + float(i)*0.8) * 0.4 * scale
                 );
-                
-                float distBrush = distance(st, u_mouse.xy * vec2(u_resolution.x/u_resolution.y, 1.0));
                 
                 float radius = 0.05 + hash2(vec2(float(i)*1.1)).x * 0.1; 
                 radius += brush * 0.2; 
@@ -143,18 +151,19 @@ const SHADER_STYLES = {
                 d = smin(d, dist, k);
             }
             
-            float shape = smoothstep(0.005, -0.005, d);
-            float inner = smoothstep(-0.1, -0.2, d);
+            float shape = smoothstep(0.01, -0.01, d);
+            float rim = smoothstep(-0.05, 0.0, d) * (1.0 - smoothstep(0.0, 0.05, d));
             
-            vec3 col = bg;
-            vec3 objCol = mix(u_c2, u_c1, inner); 
+            vec3 objCol = mix(u_c2, u_c1, smoothstep(-0.1, -0.2, d)); 
             
-            col = mix(col, objCol, shape);
+            // Fake Lighting
+            vec2 normal = normalize(vec2(dFdx(d), dFdy(d)));
+            float diff = max(dot(normal, normalize(vec2(1.0, 1.0))), 0.0);
+            float spec = pow(diff, 32.0) * u_detail;
             
-            if(d < 0.0) {
-                 float s = noise(st * 10.0 + vec2(1.0)); 
-                 if(s > 0.8) col += vec3(0.4);
-            }
+            vec3 col = mix(bg, objCol, shape);
+            col += rim * u_c1 * 0.5;
+            col += spec * vec3(1.0);
             
             gl_FragColor = vec4(col, 1.0);
         }
@@ -291,48 +300,59 @@ const SHADER_STYLES = {
         }
     `,
 
-    // --- 6. CHROMATIC GLITCH (High-End & Restored) ---
+    // --- 6. CHROMATIC GLITCH (Enhanced: Temporal Jitter & Data Corruption) ---
     chromatic_glitch: `
         float rand(vec2 n) { return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453); }
         void main() {
             vec2 st = gl_FragCoord.xy / u_resolution.xy;
             float brush = texture2D(u_brushTexture, vUv).r;
-            float t = u_time * u_speed * 30.0;
-            float pulse = step(0.8, sin(t)); 
-            vec2 grid = floor(st * (5.0 + u_scale));
-            float blockRnd = rand(grid + floor(t));
-            float glitchChance = (u_complexity * 0.1) + (pulse * 0.3) + (brush * 0.8);
+            
+            float t = u_time * u_speed * 40.0;
+            float glitch_time = floor(u_time * 10.0 * u_speed);
+            
+            vec2 grid = floor(st * (8.0 + u_scale * 0.5));
+            float blockRnd = rand(grid + glitch_time);
+            float glitchChance = (u_complexity * 0.15) + brush;
             
             vec2 displace = vec2(0.0);
-            float isGlitched = 0.0;
             if(blockRnd < glitchChance) {
-                isGlitched = 1.0;
-                displace = vec2((rand(grid + 1.0) - 0.5) * 0.2 * u_detail, (rand(grid + 2.0) - 0.5) * 0.02 * u_detail);
+                displace = vec2(
+                    (rand(grid + 1.0 + glitch_time) - 0.5) * 0.1 * u_detail,
+                    (rand(grid + 2.0 + glitch_time) - 0.5) * 0.05 * u_detail
+                );
             }
             
-            float splitAmt = 0.002 + isGlitched * 0.02 * u_detail;
+            // Temporal line jitter
+            if(rand(vec2(floor(st.y * 50.0), glitch_time)) < 0.1 * u_complexity) {
+                displace.x += (rand(vec2(glitch_time)) - 0.5) * 0.05 * u_detail;
+            }
+
+            float splitAmt = 0.005 * u_detail + (blockRnd < glitchChance ? 0.02 : 0.0);
             vec2 pR = st + displace + vec2(splitAmt, 0.0);
             vec2 pG = st + displace;
             vec2 pB = st + displace - vec2(splitAmt, 0.0);
             
-            float nR = fbm(pR * 3.0 + u_offset + vec2(0.0, u_time*0.05));
-            float nG = fbm(pG * 3.0 + u_offset + vec2(0.0, u_time*0.05));
-            float nB = fbm(pB * 3.0 + u_offset + vec2(0.0, u_time*0.05));
+            float nR = fbm(pR * (2.0 + u_scale * 0.1) + u_offset);
+            float nG = fbm(pG * (2.0 + u_scale * 0.1) + u_offset);
+            float nB = fbm(pB * (2.0 + u_scale * 0.1) + u_offset);
             
-            vec3 finalCol = u_c1 * smoothstep(0.4, 0.6, nR) * vec3(1.0, 0.0, 0.0)
-                          + u_c1 * smoothstep(0.4, 0.6, nG) * vec3(0.0, 1.0, 0.0)
-                          + u_c1 * smoothstep(0.4, 0.6, nB) * vec3(0.0, 0.0, 1.0);
+            vec3 finalCol = u_c1 * smoothstep(0.3, 0.7, nR) * vec3(1.0, 0.2, 0.1)
+                          + u_c1 * smoothstep(0.3, 0.7, nG) * vec3(0.1, 1.0, 0.2)
+                          + u_c1 * smoothstep(0.3, 0.7, nB) * vec3(0.2, 0.1, 1.0);
                           
-            float lum = length(finalCol);
-            finalCol = mix(u_c3, finalCol, smoothstep(0.1, 0.4, lum));
-            finalCol = mix(finalCol, u_c2, smoothstep(0.7, 1.0, nG));
+            finalCol = mix(u_c3, finalCol, length(finalCol) * 0.8);
+            finalCol = mix(finalCol, u_c2, pow(nG, 3.0));
             
-            if(isGlitched > 0.5) {
-                if(rand(grid + 3.0) > 0.5) finalCol = 1.0 - finalCol;
-                else finalCol *= 1.5;
-                if(mod(gl_FragCoord.y, 3.0) < 1.0) finalCol *= 0.0;
+            // Scanline and static
+            float scanline = sin(st.y * 800.0) * 0.04;
+            finalCol -= scanline;
+            finalCol += (rand(st + u_time) - 0.5) * 0.05;
+            
+            if(blockRnd < glitchChance * 0.5) {
+                finalCol = 1.0 - finalCol;
+                if(mod(gl_FragCoord.y, 4.0) < 2.0) finalCol *= 0.5;
             }
-            if(brush > 0.0) finalCol = mix(finalCol, vec3(rand(st * 100.0 + t)), brush * 0.5);
+
             gl_FragColor = vec4(finalCol, 1.0);
         }
     `,
@@ -410,126 +430,315 @@ const SHADER_STYLES = {
         }
     `,
 
-    // --- 9. CYBER GRID (High-End: Synthwave Pseudo-3D) ---
+    // --- 9. CYBER GRID (Enhanced: Reactive & Glitchy) ---
     cyber_grid: `
         void main() {
             vec2 st = gl_FragCoord.xy / u_resolution.xy;
             vec2 uv = st * 2.0 - 1.0;
             float brush = texture2D(u_brushTexture, vUv).r;
 
-            float horizon = 0.2; 
+            float horizon = 0.15 + brush * 0.1; 
             float fov = 1.0;
             float z = fov / (abs(uv.y - horizon) + 0.001); 
             float x = uv.x * z;
             
-            float speed = u_time * u_speed * 20.0;
+            float speed = u_time * u_speed * 40.0;
             vec2 gridUV = vec2(x, z + speed);
             gridUV *= u_scale * 0.5;
-            gridUV += brush * sin(z) * 0.5;
+            
+            // Grid Distort
+            gridUV.x += sin(z * 0.5 + u_time) * 0.2;
+            gridUV += brush * 2.0;
 
             vec2 grid = fract(gridUV);
-            float thickness = 0.05 + u_detail * 0.1;
+            float thickness = 0.03 + u_detail * 0.1;
             float lineX = smoothstep(thickness, 0.0, abs(grid.x - 0.5));
             float lineY = smoothstep(thickness, 0.0, abs(grid.y - 0.5));
             float gridPattern = max(lineX, lineY);
             
-            float fog = smoothstep(20.0, 0.0, z); 
-            if(uv.y > horizon + 0.01) fog = 0.0; 
-            
-            float sky = 0.0;
-            if(uv.y > horizon) {
-                float starNoise = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453);
-                if(starNoise > 0.98) sky = starNoise * (sin(u_time * 5.0 + starNoise*100.0)*0.5 + 0.5);
-            }
+            float fog = smoothstep(25.0, 2.0, z); 
+            if(uv.y > horizon) fog = 0.0; 
             
             vec3 col = u_c3; 
+            
+            // Add reactive pulses
+            float pulse = step(0.95, fract(z * 0.1 - u_time * 2.0));
             col = mix(col, u_c2, gridPattern * fog); 
+            col += u_c1 * pulse * gridPattern * fog * 0.5;
             
-            float horizonGlow = 1.0 - smoothstep(0.0, 0.5, abs(uv.y - horizon));
-            col += u_c1 * horizonGlow * 0.5;
-            col += sky * u_c1;
+            float horizonGlow = pow(1.0 - smoothstep(0.0, 0.4, abs(uv.y - horizon)), 4.0);
+            col += u_c1 * horizonGlow;
             
-            float glitch = step(0.98, sin(z * 10.0 + u_time * 20.0));
-            col += glitch * u_c1 * 0.3 * fog;
+            // Random Glitch Blocks
+            float glitch = step(0.99, sin(z * 2.0 + u_time * 10.0)) * step(0.7, hash(vec2(floor(z), u_time)));
+            col = mix(col, vec3(1.0), glitch * fog * u_detail);
 
             gl_FragColor = vec4(col, 1.0);
         }
     `,
 
-    // --- 10. PLASMA LEAK / NEBULA (New High-End) ---
+    // --- 10. ELECTRIC STORM (New: Procedural Lightning) ---
+    electric_storm: `
+        float line(vec2 p, vec2 a, vec2 b) {
+            vec2 pa = p - a, ba = b - a;
+            float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+            return length(pa - ba * h);
+        }
+        
+        void main() {
+            vec2 st = gl_FragCoord.xy / u_resolution.xy;
+            float brush = texture2D(u_brushTexture, vUv).r;
+            vec2 p = vUv * 2.0 - 1.0;
+            p.x *= u_resolution.x / u_resolution.y;
+            
+            float t = u_time * u_speed * 50.0;
+            vec3 col = u_c3;
+            
+            for(int i=0; i<5; i++) {
+                if(float(i) > u_complexity) break;
+                float fi = float(i);
+                float x = (hash(vec2(fi, floor(t * 0.1))) - 0.5) * 2.0;
+                float brightness = fract(sin(t + fi) * 437.5);
+                
+                if(brightness > 0.8 || brush > 0.5) {
+                    float noise_val = fbm(vec2(st.y * u_scale, t * 0.01 + fi));
+                    float bolt = abs(p.x - x + noise_val * 0.5);
+                    float thickness = 0.01 * u_detail;
+                    col += u_c1 * (0.002 / (bolt + 0.001)) * brightness;
+                    col += u_c2 * (0.005 / (bolt + 0.02)) * brightness;
+                }
+            }
+            
+            col += brush * u_c1 * 0.2;
+            gl_FragColor = vec4(col, 1.0);
+        }
+    `,
+
+    // --- 11. GRAVITY WELL (New: Space Distortion) ---
+    gravity_well: `
+        void main() {
+            vec2 st = gl_FragCoord.xy / u_resolution.xy;
+            vec2 mouse = u_mouse.xy;
+            float brush = texture2D(u_brushTexture, vUv).r;
+            
+            vec2 dir = st - mouse;
+            float dist = length(dir);
+            float strength = u_detail * 0.5 + brush;
+            
+            // Lensing effect
+            vec2 uv = st - dir * (strength / (dist * 10.0 + 0.1));
+            
+            float n = fbm(uv * u_scale + u_time * u_speed * 5.0);
+            vec3 col = mix(u_c3, u_c2, n);
+            col = mix(col, u_c1, smoothstep(0.4, 0.7, n));
+            
+            // Event horizon glow
+            float ring = smoothstep(0.1, 0.0, abs(dist - 0.05));
+            col += u_c1 * ring * strength;
+            
+            // Darkness at center
+            col *= smoothstep(0.02, 0.08, dist);
+            
+            gl_FragColor = vec4(col, 1.0);
+        }
+    `,
+
+    // --- 12. CRYSTAL NEBULA (New: Angular Geometry) ---
+    crystal_nebula: `
+        void main() {
+            vec2 st = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
+            float brush = texture2D(u_brushTexture, vUv).r;
+            float t = u_time * u_speed * 5.0;
+            
+            float d = 0.0;
+            vec2 p = st * u_scale * 0.2;
+            float a = atan(p.y, p.x);
+            float r = length(p);
+            
+            for(int i=0; i<4; i++) {
+                p = abs(p) / dot(p,p) - u_complexity * 0.1;
+                d = max(d, exp(-length(p)) * fbm(p + t));
+            }
+            
+            vec3 col = mix(u_c3, u_c2, d);
+            col += u_c1 * pow(d, 3.0) * 2.0;
+            col += brush * u_c1;
+            
+            gl_FragColor = vec4(col, 1.0);
+        }
+    `,
+
+    // --- 13. PLASMA LEAK / NEBULA ---
     plasma_leak: `
         void main() {
             vec2 st = gl_FragCoord.xy / u_resolution.xy;
             st.x *= u_resolution.x / u_resolution.y;
             float brush = texture2D(u_brushTexture, vUv).r;
-            
             vec2 p = st * u_scale;
             float t = u_time * u_speed * 10.0;
-            
             float v1 = sin(p.x + t);
             float v2 = sin(p.y + t);
             float v3 = sin(p.x + p.y + t);
             float v4 = sin(length(p) + t);
-            
             float p_val = (v1 + v2 + v3 + v4) * u_complexity * 0.2;
             p_val += brush * 5.0;
-            
             vec3 col = mix(u_c3, u_c2, sin(p_val));
             col = mix(col, u_c1, cos(p_val * 0.5));
-            
             col *= 1.0 + brush * u_detail * 2.0;
             gl_FragColor = vec4(col, 1.0);
         }
     `,
 
-    // --- 11. AURORA BOREALIS (New High-End) ---
+    // --- 14. AURORA BOREALIS ---
     aurora_borealis: `
         void main() {
             vec2 st = gl_FragCoord.xy / u_resolution.xy;
             float brush = texture2D(u_brushTexture, vUv).r;
-            
             float t = u_time * u_speed * 5.0;
             vec2 p = st * u_scale * 0.1;
-            
             float n = fbm(p + t + fbm(p - t));
             float r = smoothstep(0.4, 0.5, n);
             float g = smoothstep(0.5, 0.6, n);
             float b = smoothstep(0.6, 0.7, n);
-            
             vec3 aurora = (u_c1 * r + u_c2 * g + vec3(0.1, 0.2, 0.5) * b) * (1.0 - st.y);
             aurora *= u_detail * 2.0;
             aurora += brush * u_c1;
-            
             vec3 finalCol = mix(u_c3, aurora, n);
             gl_FragColor = vec4(finalCol, 1.0);
         }
     `,
 
-    // --- 12. FRACTAL MANDELBULB 2D (New High-End) ---
+    // --- 15. FRACTAL MANDELBULB 2D ---
     fractal_mandelbulb: `
         void main() {
             vec2 st = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
             float brush = texture2D(u_brushTexture, vUv).r;
-            
             vec2 c = st * (3.0 / u_scale) + (u_mouse.xy * 2.0 - 1.0);
             vec2 z = vec2(0.0);
             float iter = 0.0;
             float max_iter = 20.0 + u_complexity * 10.0;
-            
             for(float i=0.0; i<100.0; i++) {
                 if(i >= max_iter) break;
                 z = vec2(z.x*z.x - z.y*z.y, 2.0*z.x*z.y) + c;
                 if(length(z) > 2.0) break;
                 iter++;
             }
-            
             float f = iter / max_iter;
             vec3 col = mix(u_c3, u_c2, f);
             col = mix(col, u_c1, pow(f, 3.0));
-            
             if(brush > 0.1) col += u_c1 * brush * u_detail;
-            
             gl_FragColor = vec4(col, 1.0);
+        }
+    `,
+
+    // --- 16. HYPERSPACE JUMP (Classic Warp) ---
+    hyperspace_jump: `
+        void main() {
+            vec2 st = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
+            float brush = texture2D(u_brushTexture, vUv).r;
+            
+            float t = u_time * u_speed * 100.0;
+            float a = atan(st.y, st.x);
+            float r = length(st);
+            
+            vec3 col = u_c3;
+            float numStars = 50.0 + u_complexity * 20.0;
+            
+            for(float i=0.0; i<100.0; i++) {
+                if(i > numStars) break;
+                float seed = i * 123.456;
+                float angle = hash(vec2(seed, 0.0)) * 6.28;
+                float dist = fract(hash(vec2(seed, 1.0)) + t * 0.01);
+                
+                float size = 0.001 + u_detail * 0.01;
+                float star = smoothstep(size, 0.0, length(st - vec2(cos(angle), sin(angle)) * dist * 2.0));
+                
+                // Motion blur effect
+                float streak = smoothstep(0.05 * u_speed * 10.0, 0.0, length(st - vec2(cos(angle), sin(angle)) * dist * 2.0));
+                
+                col += mix(u_c2, u_c1, hash(vec2(seed, 2.0))) * star * (dist * 2.0);
+                col += u_c1 * streak * dist * 0.5;
+            }
+            
+            col += brush * u_c1;
+            gl_FragColor = vec4(col, 1.0);
+        }
+    `,
+
+    // --- 17. DIVINE MANDALA (Eternal Morphing Version) ---
+    divine_mandala: `
+        mat2 rot2D(float a) { return mat2(cos(a), -sin(a), sin(a), cos(a)); }
+        
+        // Advanced Smooth Minimum for organic blending
+        float smin(float a, float b, float k) {
+            float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+            return mix(b, a, h) - k * h * (1.0 - h);
+        }
+
+        void main() {
+            vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
+            vec2 uv0 = uv;
+            float brush = texture2D(u_brushTexture, vUv).r;
+            
+            // Auto-evolving parameters based on time
+            float slowTime = u_time * u_speed * 2.0;
+            float morpher = sin(slowTime * 0.5) * 0.5 + 0.5; // Controls shape morphing
+            float breather = sin(slowTime * 1.2) * 0.1 + 1.0; // Pumping effect
+            
+            vec3 finalColor = vec3(0.0);
+            
+            // Initialize UV with a base rotation
+            uv *= rot2D(slowTime * 0.1);
+            
+            float iter = 4.0 + u_complexity * 0.5;
+            for (float i = 0.0; i < 8.0; i++) {
+                if(i >= iter) break;
+
+                // Infinite Space Folding
+                uv = abs(uv); // Creates mirror symmetry
+                
+                // Morph between Circle and Square/Star folding
+                float foldScale = mix(1.2, 1.8, morpher);
+                uv -= 0.5 * breather;
+                uv *= rot2D(slowTime * 0.2 + i * 0.5);
+                uv *= foldScale;
+                
+                // Distance field with periodic wave evolution
+                float d = length(uv) * exp(-length(uv0));
+                
+                // This is where the magic happens: the wave shape itself evolves
+                float waveCount = 6.0 + u_scale * 0.5;
+                float wavePattern = sin(d * waveCount - slowTime * 2.0);
+                wavePattern = abs(wavePattern);
+                
+                // Morph the "sharpness" of the lines
+                float sharpness = mix(0.02, 0.005, u_detail);
+                float glow = pow(sharpness / max(wavePattern, 0.001), 1.1);
+                
+                // Dynamic Color Cycling
+                vec3 col = mix(u_c1, u_c2, sin(i + slowTime + d) * 0.5 + 0.5);
+                
+                // Additive blend with distance-based fading
+                finalColor += col * glow * (1.0 / (i + 1.0));
+                
+                // Domain warping for the next layer
+                uv += sin(uv.yx * 10.0 + slowTime) * 0.02;
+            }
+            
+            // Post-processing: Vignette and Glow
+            float edgeFade = smoothstep(1.2, 0.5, length(uv0));
+            finalColor *= edgeFade;
+            
+            // Interaction: Brush creates "energy ripples"
+            if(brush > 0.01) {
+                float ripple = sin(length(uv0) * 20.0 - u_time * 10.0) * 0.5 + 0.5;
+                finalColor += u_c1 * brush * ripple * 0.5;
+            }
+
+            // Bloom-like boost
+            finalColor = pow(finalColor, vec3(0.8)); // Gamma correction for punchier colors
+            
+            gl_FragColor = vec4(finalColor, 1.0);
         }
     `,
 

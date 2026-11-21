@@ -665,80 +665,155 @@ const SHADER_STYLES = {
         }
     `,
 
-    // --- 17. DIVINE MANDALA (Eternal Morphing Version) ---
+    // --- 17. DIVINE MANDALA (Sacred Geometry Lotus & Polar SDF Edition) ---
     divine_mandala: `
-        mat2 rot2D(float a) { return mat2(cos(a), -sin(a), sin(a), cos(a)); }
-        
-        // Advanced Smooth Minimum for organic blending
-        float smin(float a, float b, float k) {
-            float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
-            return mix(b, a, h) - k * h * (1.0 - h);
+        #define DM_PI 3.14159265359
+        #define DM_TAU 6.28318530718
+
+        mat2 dm_rot(float a) {
+            float c = cos(a), s = sin(a);
+            return mat2(c, -s, s, c);
+        }
+
+        // Exact Vesica Piscis SDF (creates crisp pointed lotus petals)
+        float dm_sdVesica(vec2 p, float r, float d) {
+            p = abs(p);
+            float b = sqrt(max(r * r - d * d, 0.0001));
+            return ((p.y - b) * d > p.x * b)
+                ? length(p - vec2(0.0, b))
+                : length(p - vec2(-d, 0.0)) - r;
+        }
+
+        // Fold 2D coordinates into N symmetrical angular wedges
+        vec2 dm_fold(vec2 p, float n, float rotAngle) {
+            p = dm_rot(rotAngle) * p;
+            float a = atan(p.y, p.x);
+            float r = length(p);
+            float sector = DM_TAU / n;
+            a = mod(a + sector * 0.5, sector) - sector * 0.5;
+            a = abs(a);
+            return vec2(cos(a), sin(a)) * r;
+        }
+
+        // Crisp glowing filigree stroke from any SDF
+        float dm_stroke(float d, float w, float glowBoost) {
+            float core = smoothstep(w, w * 0.15, abs(d));
+            float halo = exp(-abs(d) * (36.0 - glowBoost * 16.0)) * (0.28 + glowBoost * 0.35);
+            return core + halo;
         }
 
         void main() {
             vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
-            vec2 uv0 = uv;
             float brush = texture2D(u_brushTexture, vUv).r;
-            
-            // Auto-evolving parameters based on time
-            float slowTime = u_time * u_speed * 2.0;
-            float morpher = sin(slowTime * 0.5) * 0.5 + 0.5; // Controls shape morphing
-            float breather = sin(slowTime * 1.2) * 0.1 + 1.0; // Pumping effect
-            
-            vec3 finalColor = vec3(0.0);
-            
-            // Initialize UV with a base rotation
-            uv *= rot2D(slowTime * 0.1);
-            
-            float iter = 4.0 + u_complexity * 0.5;
-            for (float i = 0.0; i < 8.0; i++) {
-                if(i >= iter) break;
+            float t = u_time * (0.35 + u_speed * 130.0);
 
-                // Infinite Space Folding
-                uv = abs(uv); // Creates mirror symmetry
-                
-                // Morph between Circle and Square/Star folding
-                float foldScale = mix(1.2, 1.8, morpher);
-                uv -= 0.5 * breather;
-                uv *= rot2D(slowTime * 0.2 + i * 0.5);
-                uv *= foldScale;
-                
-                // Distance field with periodic wave evolution
-                float d = length(uv) * exp(-length(uv0));
-                
-                // This is where the magic happens: the wave shape itself evolves
-                float waveCount = 6.0 + u_scale * 0.5;
-                float wavePattern = sin(d * waveCount - slowTime * 2.0);
-                wavePattern = abs(wavePattern);
-                
-                // Morph the "sharpness" of the lines
-                float sharpness = mix(0.02, 0.005, u_detail);
-                float glow = pow(sharpness / max(wavePattern, 0.001), 1.1);
-                
-                // Dynamic Color Cycling
-                vec3 col = mix(u_c1, u_c2, sin(i + slowTime + d) * 0.5 + 0.5);
-                
-                // Additive blend with distance-based fading
-                finalColor += col * glow * (1.0 / (i + 1.0));
-                
-                // Domain warping for the next layer
-                uv += sin(uv.yx * 10.0 + slowTime) * 0.02;
-            }
-            
-            // Post-processing: Vignette and Glow
-            float edgeFade = smoothstep(1.2, 0.5, length(uv0));
-            finalColor *= edgeFade;
-            
-            // Interaction: Brush creates "energy ripples"
-            if(brush > 0.01) {
-                float ripple = sin(length(uv0) * 20.0 - u_time * 10.0) * 0.5 + 0.5;
-                finalColor += u_c1 * brush * ripple * 0.5;
+            // Subtle breathing zoom controlled by u_scale
+            float breath = 1.0 + 0.025 * sin(t * 1.1);
+            float zoom = mix(1.35, 0.72, clamp((u_scale - 0.5) / 29.5, 0.0, 1.0));
+            vec2 p = uv * zoom * breath;
+            float r = length(p);
+
+            // Even symmetry count (6, 8, 10, 12, 14, 16) from u_complexity
+            float folds = floor(3.0 + u_complexity * 0.65) * 2.0;
+            float sector = DM_TAU / folds;
+
+            // Filigree width & glow controlled by u_detail
+            float lw = mix(0.0085, 0.0038, u_detail);
+            float glowAmt = 0.25 + u_detail * 0.75;
+
+            // Deep sacred radial backdrop
+            vec3 col = mix(u_c3 * 0.35, u_c3 * 0.08, smoothstep(0.0, 1.25, r));
+            col += mix(u_c2, u_c1, 0.4) * exp(-r * 2.6) * 0.18;
+
+            // 1. CENTER BINDU & SEED OF LIFE (r < 0.17)
+            float bindu = smoothstep(0.032, 0.008, r);
+            col += mix(u_c1, vec3(1.0), 0.55) * bindu * 1.25;
+            vec2 seedP = dm_fold(p, 6.0, t * 0.22);
+            float seedCircle = abs(length(seedP - vec2(0.075, 0.0)) - 0.075);
+            col += u_c1 * dm_stroke(seedCircle, lw * 0.85, glowAmt) * 0.85 * smoothstep(0.20, 0.14, r);
+
+            // 2. INNER SACRED DOUBLE RING + PEARL BEADS (r ~ 0.19 - 0.23)
+            float innerRing1 = abs(r - 0.175);
+            float innerRing2 = abs(r - 0.225);
+            col += u_c1 * dm_stroke(innerRing1, lw, glowAmt) * 0.95;
+            col += u_c2 * dm_stroke(innerRing2, lw * 0.8, glowAmt) * 0.8;
+
+            vec2 beadP1 = dm_fold(p, folds, -t * 0.18);
+            float bead1 = length(beadP1 - vec2(0.20, 0.0)) - 0.011;
+            col += mix(u_c1, vec3(1.0), 0.35) * smoothstep(0.004, -0.002, bead1) * 1.1;
+
+            // 3. INNER LOTUS PETAL CROWN (r: 0.22 -> 0.46)
+            vec2 pInner = dm_fold(p, folds, t * 0.14);
+            // Rotate Vesica so pointed tip aims radially outward along +X
+            vec2 lp1 = vec2(pInner.y, pInner.x - 0.34);
+            float dPetal1 = dm_sdVesica(lp1, 0.155, 0.095);
+            float fill1 = smoothstep(0.006, -0.02, dPetal1);
+            float dPetal1In = dm_sdVesica(lp1, 0.115, 0.075);
+            col += mix(u_c2, u_c1, smoothstep(0.22, 0.45, r)) * fill1 * 0.22;
+            col += u_c1 * dm_stroke(dPetal1, lw * 1.05, glowAmt) * 0.95;
+            col += u_c2 * dm_stroke(dPetal1In, lw * 0.75, glowAmt) * 0.65;
+
+            // Inner petal tip jewel
+            float tip1 = length(pInner - vec2(0.465, 0.0)) - 0.010;
+            col += mix(u_c1, vec3(1.0), 0.4) * smoothstep(0.005, -0.002, tip1);
+
+            // 4. MID SACRED GEOMETRY STAR & FILIGREE RING (r ~ 0.48 - 0.56)
+            vec2 pStar = dm_fold(p, folds, -t * 0.12 + sector * 0.5);
+            // Diamond / Yantra facet between inner petals
+            vec2 sp = pStar - vec2(0.46, 0.0);
+            float dDiamond = (abs(sp.x) * 0.85 + abs(sp.y) * 1.55) - 0.085;
+            col += u_c2 * dm_stroke(dDiamond, lw * 0.9, glowAmt) * 0.85;
+            col += u_c2 * smoothstep(0.005, -0.02, dDiamond) * 0.14;
+
+            float midRing = abs(r - 0.535);
+            col += u_c1 * dm_stroke(midRing, lw * 0.9, glowAmt) * 0.85;
+
+            // 5. OUTER GRAND LOTUS PETALS (offset half-sector, r: 0.52 -> 0.84)
+            vec2 pOuter = dm_fold(p, folds, t * 0.08 + sector * 0.5);
+            vec2 lp2 = vec2(pOuter.y, pOuter.x - 0.675);
+            float dPetal2 = dm_sdVesica(lp2, 0.225, 0.135);
+            float dPetal2In = dm_sdVesica(lp2, 0.175, 0.112);
+            float fill2 = smoothstep(0.008, -0.03, dPetal2);
+
+            vec3 outerGrad = mix(u_c2, u_c1, smoothstep(0.50, 0.85, r));
+            col += outerGrad * fill2 * 0.20;
+            col += outerGrad * dm_stroke(dPetal2, lw * 1.1, glowAmt) * 1.05;
+            col += u_c1 * dm_stroke(dPetal2In, lw * 0.7, glowAmt) * 0.65;
+
+            // Central vein inside each outer lotus petal
+            float veinMask = smoothstep(0.55, 0.60, pOuter.x) * smoothstep(0.81, 0.76, pOuter.x);
+            col += u_c1 * dm_stroke(pOuter.y, lw * 0.55, glowAmt * 0.6) * veinMask * 0.55;
+
+            // Outer petal crown pearl
+            float tip2 = length(pOuter - vec2(0.865, 0.0)) - 0.014;
+            col += mix(u_c1, vec3(1.0), 0.45) * (smoothstep(0.005, -0.002, tip2) + exp(-max(tip2, 0.0) * 35.0) * 0.4);
+
+            // 6. OUTER SCALLOPED LACE & HALO RINGS (r ~ 0.84 - 0.96)
+            vec2 pLace = dm_fold(p, folds * 2.0, -t * 0.06);
+            float laceArch = abs(length(pLace - vec2(0.87, 0.0)) - 0.055);
+            col += u_c2 * dm_stroke(laceArch, lw * 0.75, glowAmt) * 0.7 * smoothstep(0.84, 0.88, r);
+
+            float outerRing1 = abs(r - 0.935);
+            float outerRing2 = abs(r - 0.965);
+            col += u_c1 * dm_stroke(outerRing1, lw * 0.95, glowAmt) * 0.9;
+            col += u_c2 * dm_stroke(outerRing2, lw * 0.65, glowAmt) * 0.6;
+
+            // Subtle outer radiating aura
+            float aura = exp(-abs(r - 0.95) * 8.0) * 0.22;
+            col += mix(u_c2, u_c1, 0.5) * aura;
+
+            // 7. INTERACTIVE MOUSE & BRUSH ENERGY RIPPLES
+            vec2 mPos = (u_mouse.xy * 2.0 - 1.0) * vec2(u_resolution.x / min(u_resolution.x, u_resolution.y), u_resolution.y / min(u_resolution.x, u_resolution.y)) * zoom;
+            col += u_c1 * exp(-length(p - mPos) * 5.0) * 0.22;
+            if (brush > 0.01) {
+                float ripple = 0.5 + 0.5 * sin(r * 26.0 - t * 6.0);
+                col += mix(u_c1, u_c2, ripple) * brush * (0.65 + 0.35 * ripple);
             }
 
-            // Bloom-like boost
-            finalColor = pow(finalColor, vec3(0.8)); // Gamma correction for punchier colors
-            
-            gl_FragColor = vec4(finalColor, 1.0);
+            // Soft vignette & punchy tone curve
+            col *= smoothstep(1.55, 0.75, r);
+            col = pow(max(col, 0.0), vec3(0.88));
+            gl_FragColor = vec4(col, 1.0);
         }
     `,
 

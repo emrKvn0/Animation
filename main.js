@@ -47,10 +47,10 @@ const SHADER_CATALOG = [
 
     // REMASTERED (Feb 2026)
     {
-        id: 'divine_mandala', name: 'Divine Mandala', category: 'Fractal', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Sacred', 'Geometry', 'Bloom', 'Brush'],
-        desc: 'Layered sacred geometry mandala with domain-warped bloom and interactive energy ripples.',
-        labels: { p1: 'Morphing Speed', p2: 'Pattern Density', p3: 'Layer Depth', p4: 'Bloom Sharpness' }
+        id: 'divine_mandala', name: 'Divine Lotus Mandala', category: 'Fractal', badge: 'NEW', added: 'Nov 2026',
+        tags: ['Sacred Geometry', 'Lotus SDF', 'Polar', 'Brush'],
+        desc: 'Authentic polar SDF sacred mandala with Seed of Life core, counter-rotating Vesica Piscis lotus petals, pearl beads & scalloped filigree.',
+        labels: { p1: 'Rotation Speed', p2: 'Mandala Zoom', p3: 'Petal Symmetry', p4: 'Filigree Glow' }
     },
     {
         id: 'hyperspace_jump', name: 'Hyperspace Jump', category: 'Cosmic', badge: 'PRO', added: 'Feb 2026',

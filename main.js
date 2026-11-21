@@ -53,58 +53,58 @@ const SHADER_CATALOG = [
         labels: { p1: 'Flow Speed', p2: 'Fractal Scale', p3: 'Mirror Folds', p4: 'Organic Detail' }
     },
     {
-        id: 'hyperspace_jump', name: 'Hyperspace Jump', category: 'Cosmic', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Starfield', 'Warp', 'Sci-Fi'],
-        desc: 'High-velocity starfield light-speed streaks pulling toward the center.',
-        labels: { p1: 'Warp Speed', p2: 'Star Density', p3: 'Complexity', p4: 'Streak Length' }
+        id: 'hyperspace_jump', name: 'Hyperspace Jump', category: 'Cosmic', badge: 'PRO', added: 'Nov 2026',
+        tags: ['Starfield', '3D Warp', 'Mouse Steer'],
+        desc: 'Multi-layered 3D relativistic starfield streaks with mouse-steered flight vector & singularity glow.',
+        labels: { p1: 'Warp Speed', p2: 'Star Density', p3: 'Glow Boost', p4: 'Streak Length' }
     },
     {
-        id: 'topographic_lines', name: 'Topographic Isolines', category: 'Organic', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Terrain', 'Contour', 'Domain Warp', 'Brush'],
-        desc: 'Domain-warped elevation contour map with pseudo-normal lighting and shadows.',
-        labels: { p1: 'Flow Velocity', p2: 'Map Scale', p3: 'Line Density', p4: 'Line Thickness' }
+        id: 'topographic_lines', name: 'Topographic Isolines', category: 'Organic', badge: 'PRO', added: 'Nov 2026',
+        tags: ['3D Hillshade', 'Contour', 'Mouse', 'Brush'],
+        desc: '3D hillshaded elevation map with major/minor contour lines & interactive cursor bulge.',
+        labels: { p1: 'Flow Velocity', p2: 'Map Scale', p3: 'Line Density', p4: 'Line Sharpness' }
     },
     {
-        id: 'metaballs_goo', name: 'Metaballs / Liquid Metal', category: 'Organic', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Slime', 'Specular', 'Fluid'],
-        desc: 'Viscous liquid metal droplets with specular rim lighting and smooth fusion.',
-        labels: { p1: 'Viscosity', p2: 'Goo Scale', p3: 'Fusion Power', p4: 'Surface Tension' }
+        id: 'metaballs_goo', name: 'Liquid Mercury Chrome', category: 'Organic', badge: 'PRO', added: 'Nov 2026',
+        tags: ['3D Normals', 'Fresnel', 'Mercury', 'Mouse'],
+        desc: 'Reflective liquid mercury metaballs with real-time surface normals, specular & Fresnel rim.',
+        labels: { p1: 'Flow Speed', p2: 'Orb Size', p3: 'Blob Count', p4: 'Surface Fusion' }
     },
     {
-        id: 'aqueous_caustics', name: 'Aqueous Caustics', category: 'Organic', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Water', 'Refraction', 'Light'],
-        desc: 'Shimmering underwater caustic light rays refracting through waves.',
-        labels: { p1: 'Wave Speed', p2: 'Refraction Scale', p3: 'Ray Complexity', p4: 'Light Depth' }
+        id: 'aqueous_caustics', name: 'Aqueous Caustics', category: 'Organic', badge: 'PRO', added: 'Nov 2026',
+        tags: ['Water', 'RGB Dispersion', 'Ripples', 'Mouse'],
+        desc: 'Dual-layer underwater caustic light rays with chromatic RGB dispersion & cursor water ripples.',
+        labels: { p1: 'Wave Speed', p2: 'Water Scale', p3: 'Ray Intensity', p4: 'RGB Dispersion' }
     },
     {
-        id: 'voronoi_cells', name: 'Organic Cell Structure', category: 'Organic', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Voronoi', 'Bio', 'Cellular'],
-        desc: 'Living Voronoi cellular membrane network with pulsing walls.',
-        labels: { p1: 'Cell Vitality', p2: 'Cell Density', p3: 'Warp Factor', p4: 'Wall Thickness' }
+        id: 'voronoi_cells', name: 'Bioluminescent Cells', category: 'Organic', badge: 'PRO', added: 'Nov 2026',
+        tags: ['Voronoi F2-F1', 'Bio', 'Nuclei', 'Mouse'],
+        desc: 'True F2-F1 Voronoi cellular membranes with pulsing nuclei & magnetic cursor pull.',
+        labels: { p1: 'Cell Vitality', p2: 'Cell Density', p3: 'Membrane Glow', p4: 'Wall Thickness' }
     },
     {
-        id: 'neon_flow', name: 'Hyper Neon Fluid', category: 'Organic', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Fluid', 'Neon', 'Vapor'],
-        desc: 'Silk-smooth hyper-saturated neon fluid waves.',
-        labels: { p1: 'Fluid Speed', p2: 'Neon Thickness', p3: 'Vapor Complexity', p4: 'Glow Strength' }
+        id: 'neon_flow', name: 'Hyper Neon Filaments', category: 'Organic', badge: 'PRO', added: 'Nov 2026',
+        tags: ['Curl Swirl', 'Filaments', 'Mouse', 'Brush'],
+        desc: 'Silk-smooth domain-warped neon fluid with glowing filaments & interactive cursor vortex.',
+        labels: { p1: 'Fluid Speed', p2: 'Fluid Scale', p3: 'Glow Boost', p4: 'Filament Edge' }
     },
     {
-        id: 'cyber_grid', name: 'Glitch Cyber Grid', category: 'Cyber', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Cyberpunk', 'Grid', 'Electric'],
-        desc: 'Electrified cybernetic data grid with glitch pulses.',
-        labels: { p1: 'Grid Speed', p2: 'Tile Scale', p3: 'Data Chaos', p4: 'Electric Detail' }
+        id: 'cyber_grid', name: 'Tron Cyber Grid 3D', category: 'Cyber', badge: 'PRO', added: 'Nov 2026',
+        tags: ['3D Perspective', 'Data Packets', 'Skyline', 'Mouse'],
+        desc: 'Infinite 3D perspective Tron grid with racing data packets, digital skyline & camera tilt.',
+        labels: { p1: 'Cruise Speed', p2: 'Grid Scale', p3: 'Packet Density', p4: 'Line Sharpness' }
     },
     {
-        id: 'electric_storm', name: 'Electric Storm', category: 'Cyber', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Lightning', 'Arcs', 'Energy'],
-        desc: 'Crackling high-voltage plasma arcs and lightning bolts.',
-        labels: { p1: 'Storm Intensity', p2: 'Frequency', p3: 'Bolt Count', p4: 'Bolt Thickness' }
+        id: 'electric_storm', name: 'Tesla Electric Storm', category: 'Cyber', badge: 'PRO', added: 'Nov 2026',
+        tags: ['Tesla Arcs', 'Lightning', 'Mouse', 'Brush'],
+        desc: 'Multi-branching jagged Tesla lightning bolts snapping dynamically to your cursor.',
+        labels: { p1: 'Arc Speed', p2: 'Cloud Scale', p3: 'Bolt Count & Jag', p4: 'Arc Thickness' }
     },
     {
-        id: 'retro_dither', name: 'Retro Dither (Ordered)', category: 'Retro', badge: 'PRO', added: 'Feb 2026',
-        tags: ['Bayer', '1-Bit', 'Pixel Art'],
-        desc: 'Classic ordered Bayer matrix dithering with retro pulse waves.',
-        labels: { p1: 'Pulse Speed', p2: 'Resolution', p3: 'Dither Pattern', p4: 'Intensity' }
+        id: 'retro_dither', name: 'Bayer 4x4 Retro Dither', category: 'Retro', badge: 'PRO', added: 'Nov 2026',
+        tags: ['Bayer 4x4', 'Pixel Art', 'CRT', 'Mouse'],
+        desc: 'True 4x4 Bayer ordered dithering over a mouse-reactive 3D wave sphere & CRT scanlines.',
+        labels: { p1: 'Pulse Speed', p2: 'Pixel Size', p3: 'Wave Rings', p4: 'Color Levels' }
     }
 ];
 

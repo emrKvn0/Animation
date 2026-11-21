@@ -12,103 +12,120 @@ const SHADER_CATALOG = [
         id: 'synthwave_sunset', name: 'Synthwave Outrun Sunset', category: 'Retro', badge: 'NEW', added: 'Nov 2026',
         tags: ['80s', 'Neon Grid', 'Mouse', 'CRT'],
         desc: 'Retro sliced sunset, glowing neon mountain ridge, perspective laser grid & twinkling stars.',
-        labels: { p1: 'Cruise Speed', p2: 'Grid Scale', p3: 'Sun Stripes', p4: 'Sun Size' }
+        labels: { p1: 'Cruise Speed', p2: 'Grid Scale', p3: 'Sun Stripes', p4: 'Sun Size' },
+        defaults: { speed: 0.0025, scale: 6.0, complexity: 4.5, detail: 0.45, c1: '#00f5d4', c2: '#ff006e', c3: '#05010f', brushR: 0.10, brushI: 1.0 }
     },
     {
         id: 'matrix_rain', name: 'Digital Matrix Rain', category: 'Cyber', badge: 'NEW', added: 'Nov 2026',
         tags: ['Code Rain', 'Glyphs', 'Mouse', 'Terminal'],
         desc: 'Cascading luminous digital glyph columns with bright leading heads and cursor pulse waves.',
-        labels: { p1: 'Fall Speed', p2: 'Column Density', p3: 'Trail Decay', p4: 'Drop Length' }
+        labels: { p1: 'Fall Speed', p2: 'Column Density', p3: 'Trail Decay', p4: 'Drop Length' },
+        defaults: { speed: 0.0020, scale: 8.0, complexity: 3.5, detail: 0.50, c1: '#52ff9a', c2: '#00a86b', c3: '#010a05', brushR: 0.10, brushI: 1.0 }
     },
     {
         id: 'lava_lamp', name: 'Psychedelic Lava Lamp', category: 'Organic', badge: 'NEW', added: 'Nov 2026',
         tags: ['Metaballs', 'Glossy', 'Mouse', 'Relaxing'],
         desc: 'Floating glossy lava blobs that smoothly merge with an interactive cursor sphere.',
-        labels: { p1: 'Buoyancy', p2: 'Blob Size', p3: 'Color Wave', p4: 'Blend Softness' }
+        labels: { p1: 'Buoyancy', p2: 'Blob Size', p3: 'Color Wave', p4: 'Blend Softness' },
+        defaults: { speed: 0.0022, scale: 7.5, complexity: 4.0, detail: 0.55, c1: '#ffb703', c2: '#fb5607', c3: '#0c0402', brushR: 0.12, brushI: 1.0 }
     },
     {
         id: 'kaleidoscope_prism', name: 'Kaleidoscope Prism', category: 'Fractal', badge: 'NEW', added: 'Nov 2026',
         tags: ['Symmetry', 'Mirrors', 'Psychedelic', 'Brush'],
         desc: 'Hypnotic N-fold mirrored kaleidoscope with rotating chromatic ribbons and energy ripples.',
-        labels: { p1: 'Spin Speed', p2: 'Prism Zoom', p3: 'Mirror Slices', p4: 'Wave Density' }
+        labels: { p1: 'Spin Speed', p2: 'Prism Zoom', p3: 'Mirror Slices', p4: 'Wave Density' },
+        defaults: { speed: 0.0020, scale: 5.5, complexity: 4.5, detail: 0.55, c1: '#e0aaff', c2: '#00f5d4', c3: '#06020e', brushR: 0.10, brushI: 1.1 }
     },
     {
         id: 'neon_tunnel', name: 'Infinite Neon Wormhole', category: 'Cosmic', badge: 'NEW', added: 'Nov 2026',
         tags: ['3D Tunnel', 'Warp', 'Mouse Steer', 'Portal'],
         desc: 'Endless twisting neon wormhole flying through 3D space with mouse-steered vanishing point.',
-        labels: { p1: 'Warp Speed', p2: 'Tunnel Depth', p3: 'Twist & Spokes', p4: 'Line Sharpness' }
+        labels: { p1: 'Warp Speed', p2: 'Tunnel Depth', p3: 'Twist & Spokes', p4: 'Line Sharpness' },
+        defaults: { speed: 0.0030, scale: 6.0, complexity: 4.0, detail: 0.65, c1: '#e0aaff', c2: '#7b2cbf', c3: '#05020d', brushR: 0.10, brushI: 1.0 }
     },
     {
         id: 'fireworks_bloom', name: 'Neon Fireworks Bloom', category: 'Retro', badge: 'NEW', added: 'Nov 2026',
         tags: ['Particles', 'Sparks', 'Shockwave', 'Brush'],
         desc: 'Looping firework bursts with sparkling trails, shockwave rings, and brush-triggered sparks.',
-        labels: { p1: 'Launch Rate', p2: 'Burst Radius', p3: 'Chaos', p4: 'Spark Spread' }
+        labels: { p1: 'Launch Rate', p2: 'Burst Radius', p3: 'Chaos', p4: 'Spark Spread' },
+        defaults: { speed: 0.0028, scale: 6.5, complexity: 4.0, detail: 0.60, c1: '#ffb703', c2: '#ff006e', c3: '#02040d', brushR: 0.11, brushI: 1.2 }
     },
 
-    // REMASTERED (Feb 2026)
+    // REMASTERED (Nov 2026)
     {
         id: 'divine_mandala', name: 'Organic Kaleidoscope Mandala', category: 'Fractal', badge: 'NEW', added: 'Nov 2026',
         tags: ['Botanical', 'Polar Mirror', 'Cosine Hue', '3D Relief'],
         desc: 'Seamless outward-flowing organic kaleidoscope mandala with ridged multifractal texture, IQ cosine hue cycling, 3D relief lighting & RGB shimmer.',
-        labels: { p1: 'Flow Speed', p2: 'Fractal Scale', p3: 'Mirror Folds', p4: 'Organic Detail' }
+        labels: { p1: 'Flow Speed', p2: 'Fractal Scale', p3: 'Mirror Folds', p4: 'Organic Detail' },
+        defaults: { speed: 0.0018, scale: 5.5, complexity: 4.7, detail: 0.60, c1: '#ffb703', c2: '#10b981', c3: '#03120e', brushR: 0.10, brushI: 1.0 }
     },
     {
         id: 'hyperspace_jump', name: 'Hyperspace Jump', category: 'Cosmic', badge: 'PRO', added: 'Nov 2026',
         tags: ['Starfield', '3D Warp', 'Mouse Steer'],
         desc: 'Multi-layered 3D relativistic starfield streaks with mouse-steered flight vector & singularity glow.',
-        labels: { p1: 'Warp Speed', p2: 'Star Density', p3: 'Glow Boost', p4: 'Streak Length' }
+        labels: { p1: 'Warp Speed', p2: 'Star Density', p3: 'Glow Boost', p4: 'Streak Length' },
+        defaults: { speed: 0.0032, scale: 7.0, complexity: 4.5, detail: 0.55, c1: '#ffffff', c2: '#60a5fa', c3: '#020617', brushR: 0.10, brushI: 1.0 }
     },
     {
         id: 'topographic_lines', name: 'Topographic Isolines', category: 'Organic', badge: 'PRO', added: 'Nov 2026',
         tags: ['3D Hillshade', 'Contour', 'Mouse', 'Brush'],
         desc: '3D hillshaded elevation map with major/minor contour lines & interactive cursor bulge.',
-        labels: { p1: 'Flow Velocity', p2: 'Map Scale', p3: 'Line Density', p4: 'Line Sharpness' }
+        labels: { p1: 'Flow Velocity', p2: 'Map Scale', p3: 'Line Density', p4: 'Line Sharpness' },
+        defaults: { speed: 0.0015, scale: 6.0, complexity: 4.5, detail: 0.65, c1: '#38bdf8', c2: '#4f46e5', c3: '#050814', brushR: 0.12, brushI: 1.0 }
     },
     {
         id: 'metaballs_goo', name: 'Liquid Mercury Chrome', category: 'Organic', badge: 'PRO', added: 'Nov 2026',
         tags: ['3D Normals', 'Fresnel', 'Mercury', 'Mouse'],
         desc: 'Reflective liquid mercury metaballs with real-time surface normals, specular & Fresnel rim.',
-        labels: { p1: 'Flow Speed', p2: 'Orb Size', p3: 'Blob Count', p4: 'Surface Fusion' }
+        labels: { p1: 'Flow Speed', p2: 'Orb Size', p3: 'Blob Count', p4: 'Surface Fusion' },
+        defaults: { speed: 0.0022, scale: 6.5, complexity: 7.0, detail: 0.50, c1: '#e2e8f0', c2: '#6366f1', c3: '#05050a', brushR: 0.11, brushI: 1.0 }
     },
     {
         id: 'aqueous_caustics', name: 'Aqueous Caustics', category: 'Organic', badge: 'PRO', added: 'Nov 2026',
         tags: ['Water', 'RGB Dispersion', 'Ripples', 'Mouse'],
         desc: 'Dual-layer underwater caustic light rays with chromatic RGB dispersion & cursor water ripples.',
-        labels: { p1: 'Wave Speed', p2: 'Water Scale', p3: 'Ray Intensity', p4: 'RGB Dispersion' }
+        labels: { p1: 'Wave Speed', p2: 'Water Scale', p3: 'Ray Intensity', p4: 'RGB Dispersion' },
+        defaults: { speed: 0.0020, scale: 7.0, complexity: 4.5, detail: 0.55, c1: '#a5f3fc', c2: '#0284c7', c3: '#021224', brushR: 0.12, brushI: 1.0 }
     },
     {
         id: 'voronoi_cells', name: 'Bioluminescent Cells', category: 'Organic', badge: 'PRO', added: 'Nov 2026',
         tags: ['Voronoi F2-F1', 'Bio', 'Nuclei', 'Mouse'],
         desc: 'True F2-F1 Voronoi cellular membranes with pulsing nuclei & magnetic cursor pull.',
-        labels: { p1: 'Cell Vitality', p2: 'Cell Density', p3: 'Membrane Glow', p4: 'Wall Thickness' }
+        labels: { p1: 'Cell Vitality', p2: 'Cell Density', p3: 'Membrane Glow', p4: 'Wall Thickness' },
+        defaults: { speed: 0.0020, scale: 6.5, complexity: 4.5, detail: 0.60, c1: '#34d399', c2: '#0ea5e9', c3: '#020b12', brushR: 0.11, brushI: 1.0 }
     },
     {
         id: 'neon_flow', name: 'Hyper Neon Filaments', category: 'Organic', badge: 'PRO', added: 'Nov 2026',
         tags: ['Curl Swirl', 'Filaments', 'Mouse', 'Brush'],
         desc: 'Silk-smooth domain-warped neon fluid with glowing filaments & interactive cursor vortex.',
-        labels: { p1: 'Fluid Speed', p2: 'Fluid Scale', p3: 'Glow Boost', p4: 'Filament Edge' }
+        labels: { p1: 'Fluid Speed', p2: 'Fluid Scale', p3: 'Glow Boost', p4: 'Filament Edge' },
+        defaults: { speed: 0.0022, scale: 5.0, complexity: 5.0, detail: 0.60, c1: '#f472b6', c2: '#6366f1', c3: '#070312', brushR: 0.12, brushI: 1.1 }
     },
     {
         id: 'cyber_grid', name: 'Tron Cyber Grid 3D', category: 'Cyber', badge: 'PRO', added: 'Nov 2026',
         tags: ['3D Perspective', 'Data Packets', 'Skyline', 'Mouse'],
         desc: 'Infinite 3D perspective Tron grid with racing data packets, digital skyline & camera tilt.',
-        labels: { p1: 'Cruise Speed', p2: 'Grid Scale', p3: 'Packet Density', p4: 'Line Sharpness' }
+        labels: { p1: 'Cruise Speed', p2: 'Grid Scale', p3: 'Packet Density', p4: 'Line Sharpness' },
+        defaults: { speed: 0.0028, scale: 6.0, complexity: 4.5, detail: 0.65, c1: '#00f5d4', c2: '#3b82f6', c3: '#020617', brushR: 0.10, brushI: 1.0 }
     },
     {
         id: 'electric_storm', name: 'Tesla Electric Storm', category: 'Cyber', badge: 'PRO', added: 'Nov 2026',
         tags: ['Tesla Arcs', 'Lightning', 'Mouse', 'Brush'],
         desc: 'Multi-branching jagged Tesla lightning bolts snapping dynamically to your cursor.',
-        labels: { p1: 'Arc Speed', p2: 'Cloud Scale', p3: 'Bolt Count & Jag', p4: 'Arc Thickness' }
+        labels: { p1: 'Arc Speed', p2: 'Cloud Scale', p3: 'Bolt Count & Jag', p4: 'Arc Thickness' },
+        defaults: { speed: 0.0025, scale: 5.5, complexity: 5.0, detail: 0.65, c1: '#93c5fd', c2: '#6366f1', c3: '#03040d', brushR: 0.11, brushI: 1.1 }
     },
     {
         id: 'retro_dither', name: 'Bayer 4x4 Retro Dither', category: 'Retro', badge: 'PRO', added: 'Nov 2026',
         tags: ['Bayer 4x4', 'Pixel Art', 'CRT', 'Mouse'],
         desc: 'True 4x4 Bayer ordered dithering over a mouse-reactive 3D wave sphere & CRT scanlines.',
-        labels: { p1: 'Pulse Speed', p2: 'Pixel Size', p3: 'Wave Rings', p4: 'Color Levels' }
+        labels: { p1: 'Pulse Speed', p2: 'Pixel Size', p3: 'Wave Rings', p4: 'Color Levels' },
+        defaults: { speed: 0.0022, scale: 6.0, complexity: 4.5, detail: 0.50, c1: '#facc15', c2: '#ef4444', c3: '#09050e', brushR: 0.11, brushI: 1.0 }
     }
 ];
 
 const getShaderMeta = (id) => SHADER_CATALOG.find(s => s.id === id) || SHADER_CATALOG[0];
+const getShaderDefaults = (id) => ({ ...getShaderMeta(id).defaults });
 
 /* --- CONSTANTS --- */
 const VERTEX_SHADER = `
@@ -403,22 +420,48 @@ const StudioManager = (() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(arts));
     };
 
-    const fixArtProperties = (art) => ({
-        id: art.id || Date.now() + Math.random(),
-        name: art.name || 'Untitled Project',
-        style: art.style || 'synthwave_sunset',
-        aspect: art.aspect || 'cinema',
-        speed: art.speed ?? 0.001,
-        scale: art.scale ?? 5.0,
-        complexity: art.complexity ?? 4.0,
-        detail: art.detail ?? 0.5,
-        c1: art.c1 || '#00f5d4',
-        c2: art.c2 || '#6366f1',
-        c3: art.c3 || '#050508',
-        brushEnabled: art.brushEnabled ?? true,
-        brushR: art.brushR ?? 0.1,
-        brushI: art.brushI ?? 1.0
-    });
+    const fixArtProperties = (art) => {
+        const style = SHADER_STYLES[art.style] ? art.style : 'synthwave_sunset';
+        const defs = getShaderDefaults(style);
+        const shaderParams = (art.shaderParams && typeof art.shaderParams === 'object') ? { ...art.shaderParams } : {};
+        const currentParams = {
+            speed: art.speed ?? defs.speed,
+            scale: art.scale ?? defs.scale,
+            complexity: art.complexity ?? defs.complexity,
+            detail: art.detail ?? defs.detail,
+            c1: art.c1 || defs.c1,
+            c2: art.c2 || defs.c2,
+            c3: art.c3 || defs.c3,
+            brushR: art.brushR ?? defs.brushR,
+            brushI: art.brushI ?? defs.brushI
+        };
+        if (!shaderParams[style]) {
+            shaderParams[style] = { ...currentParams };
+        }
+        return {
+            id: art.id || Date.now() + Math.random(),
+            name: art.name || 'Untitled Project',
+            style,
+            aspect: art.aspect || 'cinema',
+            brushEnabled: art.brushEnabled ?? true,
+            shaderParams,
+            ...shaderParams[style]
+        };
+    };
+
+    const syncInputsFromArt = () => {
+        if (!activeArt) return;
+        document.getElementById('ui-speed').value = activeArt.speed;
+        document.getElementById('ui-scale').value = activeArt.scale;
+        document.getElementById('ui-complexity').value = activeArt.complexity;
+        document.getElementById('ui-detail').value = activeArt.detail;
+        document.getElementById('ui-c1').value = activeArt.c1;
+        document.getElementById('ui-c2').value = activeArt.c2;
+        document.getElementById('ui-c3').value = activeArt.c3;
+        document.getElementById('ui-brush-r').value = activeArt.brushR;
+        document.getElementById('ui-brush-i').value = activeArt.brushI;
+        document.getElementById('ui-brush-enabled').checked = activeArt.brushEnabled;
+    };
 
     const createDefaultArt = (name, style = 'synthwave_sunset', c1, c2, c3) => {
         return fixArtProperties({ name, style, c1, c2, c3 });
@@ -586,11 +629,46 @@ const StudioManager = (() => {
 
     const selectShader = (styleId) => {
         if (!activeArt || !designerEngine) return;
+        // Save current shader's parameters locally before switching
+        activeArt.shaderParams = activeArt.shaderParams || {};
+        activeArt.shaderParams[activeArt.style] = {
+            speed: activeArt.speed,
+            scale: activeArt.scale,
+            complexity: activeArt.complexity,
+            detail: activeArt.detail,
+            c1: activeArt.c1,
+            c2: activeArt.c2,
+            c3: activeArt.c3,
+            brushR: activeArt.brushR,
+            brushI: activeArt.brushI
+        };
+
+        // Load target shader's saved parameters or its tailored defaults
         activeArt.style = styleId;
+        const nextParams = activeArt.shaderParams[styleId]
+            ? { ...getShaderDefaults(styleId), ...activeArt.shaderParams[styleId] }
+            : getShaderDefaults(styleId);
+        activeArt.shaderParams[styleId] = { ...nextParams };
+        Object.assign(activeArt, nextParams);
+
+        syncInputsFromArt();
         designerEngine.sync(activeArt);
         updateLabels();
         renderShaderCatalog();
         saveToVault();
+    };
+
+    const resetShaderParams = () => {
+        if (!activeArt || !designerEngine) return;
+        const defs = getShaderDefaults(activeArt.style);
+        activeArt.shaderParams = activeArt.shaderParams || {};
+        activeArt.shaderParams[activeArt.style] = { ...defs };
+        Object.assign(activeArt, defs);
+        syncInputsFromArt();
+        designerEngine.sync(activeArt);
+        updateLabels();
+        saveToVault();
+        showToast("Shader Reset to Defaults");
     };
 
     // --- DESIGNER LOGIC ---
@@ -604,17 +682,7 @@ const StudioManager = (() => {
         designer.classList.add('active');
         document.getElementById('active-art-name').innerText = activeArt.name;
 
-        // Sync inputs
-        document.getElementById('ui-speed').value = activeArt.speed;
-        document.getElementById('ui-scale').value = activeArt.scale;
-        document.getElementById('ui-complexity').value = activeArt.complexity;
-        document.getElementById('ui-detail').value = activeArt.detail;
-        document.getElementById('ui-c1').value = activeArt.c1;
-        document.getElementById('ui-c2').value = activeArt.c2;
-        document.getElementById('ui-c3').value = activeArt.c3;
-        document.getElementById('ui-brush-r').value = activeArt.brushR;
-        document.getElementById('ui-brush-i').value = activeArt.brushI;
-        document.getElementById('ui-brush-enabled').checked = activeArt.brushEnabled;
+        syncInputsFromArt();
 
         const container = document.getElementById('studio-canvas-container');
         container.innerHTML = '';
@@ -650,6 +718,19 @@ const StudioManager = (() => {
         activeArt.c3 = document.getElementById('ui-c3').value;
         activeArt.brushR = parseFloat(document.getElementById('ui-brush-r').value);
         activeArt.brushI = parseFloat(document.getElementById('ui-brush-i').value);
+
+        activeArt.shaderParams = activeArt.shaderParams || {};
+        activeArt.shaderParams[activeArt.style] = {
+            speed: activeArt.speed,
+            scale: activeArt.scale,
+            complexity: activeArt.complexity,
+            detail: activeArt.detail,
+            c1: activeArt.c1,
+            c2: activeArt.c2,
+            c3: activeArt.c3,
+            brushR: activeArt.brushR,
+            brushI: activeArt.brushI
+        };
 
         designerEngine.sync(activeArt);
         updateLabels();
@@ -847,7 +928,7 @@ const StudioManager = (() => {
         init, createNewArt, deleteArt, closeDesigner, updateActiveParams,
         setAspect, toggleRecording, exportProject, importProject, duplicateCurrent,
         getArtById, openDesigner, switchTab, selectCategory, renderShaderCatalog,
-        selectShader, applyPalette, toggleBrush, clearBrush
+        selectShader, applyPalette, toggleBrush, clearBrush, resetShaderParams
     };
 })();
 
